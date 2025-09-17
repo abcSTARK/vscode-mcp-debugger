@@ -9,7 +9,6 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
@@ -45,8 +44,11 @@
     "views": {
       "mcpDebugger": [
         {
-          "id": "mcpDebuggerView",
-          "name": "MCP Inspector"
+          "id": "mcpInspectorSidebarView",
+          "name": "MCP Inspector Sidebar",
+          "type": "webview",
+          "icon": "$(debug-alt)",
+          "when": "true"
         }
       ]
     },

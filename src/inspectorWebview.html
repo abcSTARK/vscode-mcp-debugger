@@ -129,7 +129,7 @@
                 <ol>
                     <li>Run your MCP server locally</li>
                     <li>Start the MCP inspector with: <code>npx @modelcontextprotocol/inspector</code></li>
-                    <li>The inspector typically runs on <code>http://localhost:3000</code></li>
+                    <li>The inspector typically runs on <code data-code="http://localhost:3000">http://localhost:3000</code></li>
                     <li>Update the URL above if your inspector runs on a different port</li>
                     <li>Click "Reload" to load the inspector interface</li>
                 </ol>
@@ -144,11 +144,49 @@
         function reloadInspector() {
             const urlInput = document.getElementById('urlInput');
             const url = urlInput.value.trim();
-            if (!url) {
-                showInlineError('Please enter a valid URL');
+            const res = validateInspectorUrl(url);
+            if (!res.ok) {
+                showInlineError(res.message || 'Please enter a valid URL');
                 return;
             }
             loadInspector(url);
+        }
+
+        function showMessage(text, type = 'info') {
+            // place near header, ephemeral for 'info'
+            const header = document.querySelector('.header');
+            let el = document.getElementById('inlineMessage');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'inlineMessage';
+                el.style.marginLeft = '12px';
+                el.style.padding = '6px 8px';
+                el.style.borderRadius = '4px';
+                el.style.fontSize = '12px';
+                header.appendChild(el);
+            }
+            el.textContent = text;
+            if (type === 'error') {
+                el.style.color = 'var(--vscode-errorForeground)';
+            } else {
+                el.style.color = 'var(--vscode-foreground)';
+            }
+            if (type === 'info') {
+                setTimeout(() => { try { el.style.opacity = '0'; } catch (e) {} }, 1800);
+                setTimeout(() => { try { el.remove(); } catch (e) {} }, 2400);
+            }
+        }
+
+        function validateInspectorUrl(v) {
+            if (!v) return { ok: false, message: 'Please paste the inspector URL.' };
+            try {
+                const parsed = new URL(v);
+                if (!/^https?:$/.test(parsed.protocol)) return { ok: false, message: 'URL must start with http:// or https://.' };
+                if (!parsed.searchParams.has('MCP_PROXY_AUTH_TOKEN')) return { ok: false, message: 'URL is missing MCP_PROXY_AUTH_TOKEN query parameter.' };
+                return { ok: true };
+            } catch (e) {
+                return { ok: false, message: 'Invalid URL format.' };
+            }
         }
         
         function loadInspector(url) {
@@ -165,6 +203,8 @@
                 console.log('MCP Inspector loaded successfully');
                 // Focus the iframe so keyboard events go to the inspector by default
                 try { iframe.focus(); } catch (e) { /* ignore */ }
+                // show ephemeral confirmation
+                try { showMessage('Saved and opened', 'info'); } catch (e) {}
             };
             iframe.onerror = function() {
                 showError('Failed to load MCP Inspector. Please ensure the inspector is running and accessible.');
@@ -241,6 +281,31 @@
             });
         });
 
+        // add copy buttons for code blocks
+        function attachCopyButtons() {
+            const codes = document.querySelectorAll('code[data-code]');
+            codes.forEach(c => {
+                const btn = document.createElement('button');
+                btn.textContent = 'Copy';
+                btn.style.marginLeft = '8px';
+                btn.style.padding = '2px 6px';
+                btn.style.fontSize = '11px';
+                btn.style.borderRadius = '4px';
+                btn.style.border = 'none';
+                btn.style.cursor = 'pointer';
+                const text = c.getAttribute('data-code') || c.textContent || '';
+                btn.addEventListener('click', () => {
+                    navigator.clipboard.writeText(text).then(() => {
+                        showMessage('Copied to clipboard', 'info');
+                    }).catch(() => { showInlineError('Copy failed'); });
+                });
+                c.parentNode.insertBefore(btn, c.nextSibling);
+            });
+        }
+
+        // run after DOM ready
+        try { attachCopyButtons(); } catch (e) {}
+
         // tabs
         function setTab(name) {
             window.__activeTab = name;
@@ -291,6 +356,17 @@
                 } catch (e) {
                     // ignore
                 }
+            } else if (msg.command === 'forceCollapse') {
+                try {
+                    // collapse only if not already collapsed
+                    if (!window.__collapsed) {
+                        window.__collapsed = true;
+                        const contentDiv = document.getElementById('content');
+                        contentDiv.innerHTML = '<div style="padding:20px;">Inspector collapsed. Click Expand to restore.</div>';
+                        const collapseBtn = document.getElementById('collapseBtn');
+                        if (collapseBtn) collapseBtn.textContent = 'Expand';
+                    }
+                } catch (e) {}
             }
         });
         

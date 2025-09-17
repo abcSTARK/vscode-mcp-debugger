@@ -1,12 +1,36 @@
 import * as vscode from 'vscode';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { McpInspectorSidebarProvider } from './mcpInspectorSidebarProvider';
 
 /**
  * Activate the extension.
  */
 export function activate(context: vscode.ExtensionContext) {
   console.log('MCP Debugger extension activated');
+
+  // Register the new sidebar provider
+  try {
+    const provider = new McpInspectorSidebarProvider();
+    const registration = vscode.window.registerWebviewViewProvider(
+      'mcpInspectorSidebarView',
+      provider,
+      {
+        webviewOptions: {
+          retainContextWhenHidden: true,
+        },
+      }
+    );
+    context.subscriptions.push(registration);
+    console.log(
+      'Sidebar provider registered successfully for view: mcpInspectorSidebarView'
+    );
+  } catch (error) {
+    console.error('Failed to register sidebar provider:', error);
+    vscode.window.showErrorMessage(
+      'Failed to register MCP sidebar provider: ' + error
+    );
+  }
 
   // Command to open the inspector in a standalone webview panel
   const openCmd = vscode.commands.registerCommand(
@@ -32,17 +56,6 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(openCmd, openInViewCmd);
 
-  // Register a WebviewViewProvider for the activity bar view
-  const viewProvider = new MCPInspectorViewProvider(
-    context.extensionUri,
-    context
-  );
-  context.subscriptions.push(
-    vscode.window.registerWebviewViewProvider('mcpDebuggerView', viewProvider, {
-      webviewOptions: { retainContextWhenHidden: true },
-    })
-  );
-
   // Register a serializer so the webview panel can be restored across reloads
   if (vscode.window.registerWebviewPanelSerializer) {
     context.subscriptions.push(
@@ -67,87 +80,6 @@ export function activate(context: vscode.ExtensionContext) {
  */
 export function deactivate() {
   // noop
-}
-
-/**
- * A WebviewViewProvider that renders the inspector in the activity bar view.
- */
-class MCPInspectorViewProvider implements vscode.WebviewViewProvider {
-  public static readonly viewType = 'mcpDebuggerView';
-  private _view?: vscode.WebviewView;
-  constructor(
-    private readonly extensionUri: vscode.Uri,
-    private readonly context: vscode.ExtensionContext
-  ) {}
-
-  public resolveWebviewView(webviewView: vscode.WebviewView) {
-    this._view = webviewView;
-    webviewView.webview.options = {
-      enableScripts: true,
-      localResourceRoots: [vscode.Uri.joinPath(this.extensionUri, 'src')],
-    };
-    webviewView.webview.html = this.getHtml();
-
-    // If we previously saved view-specific state (e.g. lastUrl), forward it
-    // to the webview so it can restore its UI when the view is revealed again.
-    try {
-      const saved = this.context.globalState.get<any>('mcpDebugger.viewState');
-      if (saved) {
-        webviewView.webview.postMessage({
-          command: 'restoreState',
-          state: saved,
-          restored: true,
-          restoredAt: Date.now(),
-        });
-      }
-    } catch (e) {
-      // ignore
-    }
-
-    webviewView.webview.onDidReceiveMessage((m) => {
-      // Persist view state when the webview asks us to save it so we can
-      // restore on collapse/reopen or between host restarts.
-      if (m?.command === 'updateUrl' && typeof m.url === 'string') {
-        try {
-          this.context.globalState.update('mcpDebugger.viewState', {
-            lastUrl: m.url,
-          });
-        } catch (e) {
-          // ignore
-        }
-      } else if (m?.command === 'saveState' && m.state) {
-        try {
-          this.context.globalState.update('mcpDebugger.viewState', m.state);
-        } catch (e) {
-          // ignore
-        }
-      }
-
-      // Forward message to panel handler if present (keeps behavior unified)
-      MCPInspectorPanel.currentPanel?.onMessage(m);
-    });
-  }
-
-  private getHtml(): string {
-    // Reuse the same template loading as the panel
-    const htmlPath = join(
-      this.context.extensionPath,
-      'src',
-      'inspectorWebview.html'
-    );
-    try {
-      let html = readFileSync(htmlPath, { encoding: 'utf8' });
-      const config = vscode.workspace.getConfiguration('mcpDebugger');
-      const inspectorUrl = config.get<string>(
-        'inspectorUrl',
-        'http://localhost:3000'
-      );
-      html = html.replace(/{{INSPECTOR_URL}}/g, inspectorUrl);
-      return html;
-    } catch (err) {
-      return `<!doctype html><html><body><h2>Failed to load view template</h2><pre>${err}</pre></body></html>`;
-    }
-  }
 }
 
 /**
