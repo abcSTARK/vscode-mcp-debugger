@@ -25,39 +25,66 @@
         }
 
         .header {
-            padding: 10px;
+            padding: 8px 10px;
             background-color: var(--vscode-titleBar-activeBackground);
             color: var(--vscode-titleBar-activeForeground);
             border-bottom: 1px solid var(--vscode-widget-border);
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .header .left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1 1 480px;
+            min-width: 240px;
+        }
+
+        .header .right {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .label {
+            font-size: 12px;
+            color: var(--vscode-descriptionForeground);
+            white-space: nowrap;
         }
 
         .url-input {
-            padding: 5px 10px;
+            padding: 6px 10px;
             border: 1px solid var(--vscode-input-border);
-            border-radius: 3px;
+            border-radius: 4px;
             background-color: var(--vscode-input-background);
             color: var(--vscode-input-foreground);
-            margin: 0 10px;
-            flex: 1;
-            max-width: 400px;
+            flex: 1 1 auto;
+            min-width: 120px;
+            max-width: 640px;
         }
+        .url-input.invalid { border-color: var(--vscode-inputValidation-errorBorder); }
+        .error-text { font-size: 12px; color: var(--vscode-errorForeground); }
 
-        .reload-btn {
-            padding: 5px 15px;
+        .btn {
+            height: 28px;
+            padding: 0 10px;
             border: 1px solid var(--vscode-button-border);
-            border-radius: 3px;
+            border-radius: 4px;
             background-color: var(--vscode-button-background);
             color: var(--vscode-button-foreground);
             cursor: pointer;
-            margin-left: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
-
-        .reload-btn:hover {
-            background-color: var(--vscode-button-hoverBackground);
-        }
+        .btn:hover { background-color: var(--vscode-button-hoverBackground); }
+        .btn .icon { display: inline-flex; align-items: center; justify-content: center; }
+        .btn .label { font-size: 12px; }
+        @media (max-width: 560px) { .btn .label { display:none; } .btn { padding: 0 8px; } }
 
         #content {
             flex: 1 1 0;
@@ -74,7 +101,7 @@
             border: none;
             width: 100%;
             height: 100%;
-            background-color: white;
+            background-color: var(--vscode-editor-background);
             display: block;
         }
 
@@ -112,15 +139,28 @@
 <body>
     <div class="container">
         <div class="header">
-            <label for="urlInput">MCP Inspector URL:</label>
-            <input type="text" id="urlInput" class="url-input" value="{{INSPECTOR_URL}}" placeholder="http://localhost:3000">
-            <div style="display:flex; align-items:center; gap:8px;">
-                <button id="collapseBtn" class="reload-btn" onclick="toggleCollapse()">Collapse</button>
-                <button class="reload-btn" onclick="reloadInspector()">Reload</button>
+            <div class="left">
+                <label for="urlInput" class="label">MCP Inspector URL</label>
+                <input type="text" id="urlInput" class="url-input" value="{{INSPECTOR_URL}}" placeholder="http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=…" aria-describedby="urlError">
+                <span id="urlError" class="error-text" aria-live="polite"></span>
+            </div>
+            <div class="right">
+                <button id="reloadBtn" class="btn" title="Reload (Enter)" aria-label="Reload">
+                    <span class="icon" aria-hidden="true">
+                        <svg viewBox="0 0 16 16" width="14" height="14" fill="none"><path d="M8 3a5 5 0 1 1-4.546 2.916" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M2 3.5h3.5V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </span>
+                    <span class="label">Reload</span>
+                </button>
+                <button id="collapseBtn" class="btn" title="Collapse" aria-label="Collapse">
+                    <span class="icon" aria-hidden="true">
+                        <svg viewBox="0 0 16 16" width="14" height="14" fill="none"><path id="collapseIcon" d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </span>
+                    <span id="collapseLabel" class="label">Collapse</span>
+                </button>
             </div>
         </div>
         
-        <div style="padding:8px; display:flex; gap:8px; align-items:center;"></div>
+    <div style="padding:8px; display:flex; gap:8px; align-items:center;"></div>
         <div id="content">
             <div class="info-message">
                 <h3>Welcome to MCP Inspector</h3>
@@ -231,15 +271,27 @@
             if (window.__collapsed) {
                 // hide inspector and show a small placeholder
                 contentDiv.innerHTML = '<div style="padding:20px;">Inspector collapsed. Click Expand to restore.</div>';
-                collapseBtn.textContent = 'Expand';
+                if (collapseBtn) {
+                    const label = document.getElementById('collapseLabel');
+                    if (label) label.textContent = 'Expand';
+                    collapseBtn.setAttribute('title', 'Expand');
+                    const icon = document.getElementById('collapseIcon');
+                    if (icon) icon.setAttribute('d', 'M4 10l4-4 4 4');
+                }
             } else {
                 // Try to reload last URL or default
-                collapseBtn.textContent = 'Collapse';
+                if (collapseBtn) {
+                    const label = document.getElementById('collapseLabel');
+                    if (label) label.textContent = 'Collapse';
+                    collapseBtn.setAttribute('title', 'Collapse');
+                    const icon = document.getElementById('collapseIcon');
+                    if (icon) icon.setAttribute('d', 'M4 6l4 4 4-4');
+                }
                 const urlInput = document.getElementById('urlInput');
                 if (urlInput.value) loadInspector(urlInput.value);
             }
             try {
-                    const state = { lastUrl: document.getElementById('urlInput').value, collapsed: window.__collapsed };
+                const state = { lastUrl: document.getElementById('urlInput').value, collapsed: window.__collapsed };
                 vscode.setState(state);
                 vscode.postMessage({ command: 'saveState', state });
             } catch (e) {
@@ -260,17 +312,20 @@
         }
 
         function showInlineError(message) {
-            const header = document.querySelector('.header');
-            let el = document.getElementById('inlineError');
-            if (!el) {
-                el = document.createElement('div');
-                el.id = 'inlineError';
-                el.style.color = 'var(--vscode-errorForeground)';
-                el.style.marginLeft = '12px';
-                header.appendChild(el);
+            const input = document.getElementById('urlInput');
+            const err = document.getElementById('urlError');
+            if (err) err.textContent = message || '';
+            if (input) {
+                input.classList.add('invalid');
+                input.setAttribute('aria-invalid', 'true');
             }
-            el.textContent = message;
-            setTimeout(() => { if (el) el.textContent = ''; }, 5000);
+            setTimeout(() => {
+                if (err) err.textContent = '';
+                if (input) {
+                    input.classList.remove('invalid');
+                    input.removeAttribute('aria-invalid');
+                }
+            }, 5000);
         }
         
         // Save URL changes to VSCode settings
@@ -281,23 +336,46 @@
             });
         });
 
+        // Enter to reload and clear error on input
+        document.getElementById('urlInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                reloadInspector();
+            }
+        });
+        document.getElementById('urlInput').addEventListener('input', function() {
+            const err = document.getElementById('urlError');
+            if (err) err.textContent = '';
+            this.classList.remove('invalid');
+            this.removeAttribute('aria-invalid');
+        });
+
         // add copy buttons for code blocks
         function attachCopyButtons() {
             const codes = document.querySelectorAll('code[data-code]');
             codes.forEach(c => {
                 const btn = document.createElement('button');
-                btn.textContent = 'Copy';
-                btn.style.marginLeft = '8px';
-                btn.style.padding = '2px 6px';
-                btn.style.fontSize = '11px';
+                btn.style.marginLeft = '6px';
+                btn.style.width = '22px';
+                btn.style.height = '22px';
+                btn.style.display = 'inline-flex';
+                btn.style.alignItems = 'center';
+                btn.style.justifyContent = 'center';
+                btn.style.fontSize = '14px';
                 btn.style.borderRadius = '4px';
                 btn.style.border = 'none';
+                btn.style.background = 'transparent';
+                btn.style.color = 'var(--vscode-descriptionForeground)';
                 btn.style.cursor = 'pointer';
+                btn.style.opacity = '0.6';
+                btn.title = 'Copy to clipboard';
+                btn.setAttribute('aria-label', 'Copy to clipboard');
+                btn.innerHTML = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true" focusable="false"><path d="M6 2h7a1 1 0 0 1 1 1v7h-2V4H6V2z" fill="currentColor" opacity=".45"/><rect x="2" y="4" width="9" height="9" rx="1.5" fill="currentColor"/></svg>';
+                btn.onmouseenter = () => { btn.style.opacity = '1'; btn.style.background = 'var(--vscode-toolbar-hoverBackground)'; btn.style.color = 'var(--vscode-foreground)'; };
+                btn.onmouseleave = () => { btn.style.opacity = '0.6'; btn.style.background = 'transparent'; btn.style.color = 'var(--vscode-descriptionForeground)'; };
                 const text = c.getAttribute('data-code') || c.textContent || '';
                 btn.addEventListener('click', () => {
-                    navigator.clipboard.writeText(text).then(() => {
-                        showMessage('Copied to clipboard', 'info');
-                    }).catch(() => { showInlineError('Copy failed'); });
+                    navigator.clipboard.writeText(text).catch(() => { showInlineError('Copy failed'); });
                 });
                 c.parentNode.insertBefore(btn, c.nextSibling);
             });
@@ -305,6 +383,14 @@
 
         // run after DOM ready
         try { attachCopyButtons(); } catch (e) {}
+
+        // toolbar button events
+        (function initToolbar(){
+            const reloadBtn = document.getElementById('reloadBtn');
+            if (reloadBtn) reloadBtn.addEventListener('click', reloadInspector);
+            const collapseBtn = document.getElementById('collapseBtn');
+            if (collapseBtn) collapseBtn.addEventListener('click', toggleCollapse);
+        })();
 
         // tabs
         function setTab(name) {
@@ -345,7 +431,13 @@
                             const contentDiv = document.getElementById('content');
                             contentDiv.innerHTML = '<div style="padding:20px;">Inspector collapsed. Click Expand to restore.</div>';
                             const collapseBtn = document.getElementById('collapseBtn');
-                            if (collapseBtn) collapseBtn.textContent = 'Expand';
+                            if (collapseBtn) {
+                                const label = document.getElementById('collapseLabel');
+                                if (label) label.textContent = 'Expand';
+                                collapseBtn.setAttribute('title', 'Expand');
+                                const icon = document.getElementById('collapseIcon');
+                                if (icon) icon.setAttribute('d', 'M4 10l4-4 4 4');
+                            }
                         }
                     }
 
@@ -364,7 +456,13 @@
                         const contentDiv = document.getElementById('content');
                         contentDiv.innerHTML = '<div style="padding:20px;">Inspector collapsed. Click Expand to restore.</div>';
                         const collapseBtn = document.getElementById('collapseBtn');
-                        if (collapseBtn) collapseBtn.textContent = 'Expand';
+                        if (collapseBtn) {
+                            const label = document.getElementById('collapseLabel');
+                            if (label) label.textContent = 'Expand';
+                            collapseBtn.setAttribute('title', 'Expand');
+                            const icon = document.getElementById('collapseIcon');
+                            if (icon) icon.setAttribute('d', 'M4 10l4-4 4 4');
+                        }
                     }
                 } catch (e) {}
             }
