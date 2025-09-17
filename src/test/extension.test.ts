@@ -8,8 +8,21 @@ import * as vscode from 'vscode';
 suite('Extension Test Suite', () => {
 	vscode.window.showInformationMessage('Start all tests.');
 
-	test('Sample test', () => {
-		assert.strictEqual(-1, [1, 2, 3].indexOf(5));
-		assert.strictEqual(-1, [1, 2, 3].indexOf(0));
+	test('Extension should be present', () => {
+		assert.ok(vscode.extensions.getExtension('undefined_publisher.mcp-debugger'));
+	});
+
+	test('Should register mcp-debugger.openInspector command', async () => {
+		const commands = await vscode.commands.getCommands(true);
+		assert.ok(commands.includes('mcp-debugger.openInspector'));
+	});
+
+	test('Should have configuration contribution', () => {
+		const config = vscode.workspace.getConfiguration('mcpDebugger');
+		assert.ok(config !== undefined);
+		
+		// Test default inspector URL configuration
+		const inspectorUrl = config.get('inspectorUrl');
+		assert.strictEqual(inspectorUrl, 'http://localhost:3000');
 	});
 });

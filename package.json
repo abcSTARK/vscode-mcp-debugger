@@ -14,10 +14,31 @@
   "contributes": {
     "commands": [
       {
-        "command": "mcp-debugger.helloWorld",
-        "title": "Hello World"
+        "command": "mcp-debugger.openInspector",
+        "title": "Open MCP Inspector",
+        "category": "MCP Debugger"
       }
-    ]
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "mcp-debugger.openInspector",
+          "when": "true"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "MCP Debugger",
+      "properties": {
+        "mcpDebugger.inspectorUrl": {
+          "type": "string",
+          "default": "http://localhost:3000",
+          "description": "URL where the MCP Inspector is running",
+          "pattern": "^https?://.+",
+          "patternErrorMessage": "Must be a valid HTTP or HTTPS URL"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
