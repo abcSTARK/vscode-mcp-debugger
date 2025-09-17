@@ -1,88 +1,97 @@
-# MCP Debugger
+# MCP Vibe Inspector
 
-A Visual Studio Code extension for debugging MCP (Model Context Protocol) servers. This extension provides an integrated webview panel that displays the MCP Inspector interface, making it easy to test and debug your local MCP servers without leaving your development environment.
+Debug and inspect Model Context Protocol (MCP) servers right inside VS Code.
 
-## Features
+This extension embeds the MCP Vibe Inspector in a Webview Panel and provides a lightweight sidebar to quickly configure and launch your Inspector instance—no context switch to the browser needed.
 
-- **Integrated MCP Inspector**: Open the MCP Inspector directly within VS Code
-- **Configurable URL**: Set custom URL for your MCP Inspector instance
-- **Easy Access**: Access via Command Palette with "Open MCP Inspector"
-- **Embedded Interface**: Full inspector functionality within a VS Code webview panel
+## ✨ Features
 
-## Usage
+- Seamless MCP Vibe Inspector panel inside VS Code
+- Sidebar launcher with URL input and client-side validation
+- Loading/error overlay to avoid blank screens and provide quick Retry
+- Copy-to-clipboard for inline code snippets (icon-only buttons)
+- Theme-aware, accessible UI using VS Code design tokens
+- Remembers your last URL and panel state
 
-### Prerequisites
+## 🚀 Getting started
 
-1. Have a local MCP server running
-2. Install and run the MCP Inspector:
-   ```bash
-   npx @modelcontextprotocol/inspector
-   ```
+1. Start your MCP Vibe Inspector locally:
 
-### Opening the Inspector
-
-1. Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`)
-2. Search for and run "Open MCP Inspector"
-3. A new panel will open showing the MCP Inspector interface
-4. If your inspector runs on a different port, update the URL in the panel header
-
-### Configuration
-
-You can configure the default inspector URL in VS Code settings:
-
-1. Open Settings (`Ctrl+,` / `Cmd+,`)
-2. Search for "MCP Debugger"
-3. Set "Inspector Url" to your preferred URL (default: `http://localhost:3000`)
-
-Alternatively, you can update `settings.json`:
-
-```json
-{
-  "mcpDebugger.inspectorUrl": "http://localhost:3000"
-}
+```bash
+npx @modelcontextprotocol/inspector
 ```
 
-## What is MCP?
+2. Open the Inspector panel:
 
-The Model Context Protocol (MCP) is an open protocol that enables seamless integration between LLM applications and external data sources and tools. The MCP Inspector is a debugging tool that helps you test and validate your MCP server implementations.
+- Command Palette → “Open MCP Vibe Inspector”
+- Or via the Activity Bar “MCP” view
 
-## Development
+3. Paste or confirm your Inspector URL in the panel header. Example:
 
-To work on this extension:
+```
+http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=…
+```
 
-1. Clone the repository
-2. Run `npm install` to install dependencies
-3. Open in VS Code and press `F5` to launch a new Extension Development Host
-4. Test the extension in the new VS Code window
+4. Press Enter or click Reload. If loading takes too long, you’ll see a helpful overlay with a Retry action.
 
-### Building
+## 🧭 Commands
+
+- `MCP Vibe Inspector: Open MCP Vibe Inspector` (mcp-debugger.openInspector)
+- `MCP Vibe Inspector: Open MCP Vibe Inspector (Activity View)` (mcp-debugger.openInspectorInView)
+
+## ⚙️ Settings
+
+- `mcpDebugger.inspectorUrl` (string)
+  - Default: `http://localhost:3000`
+  - The URL where MCP Vibe Inspector is running. Must be http/https and typically includes `MCP_PROXY_AUTH_TOKEN`.
+
+Settings UI: File → Preferences → Settings → search for “MCP Vibe Inspector”.
+
+## 🔧 Troubleshooting
+
+- “Still loading…” overlay appears
+  - The Inspector may be slow or unreachable. Verify the URL and network, then use Retry.
+- “Failed to load the inspector”
+  - Check that your Inspector process is running and accessible from VS Code.
+- Invalid URL error
+  - Ensure the URL starts with http/https and includes the `MCP_PROXY_AUTH_TOKEN` query parameter when required.
+
+## ❓ FAQ
+
+- Does this extension send telemetry?
+  - No. There is no telemetry.
+- Can I open in a separate window instead?
+  - The extension focuses on an embedded experience; you can still open the same URL in your browser if preferred.
+
+## 🧩 What is MCP?
+
+The Model Context Protocol (MCP) is an open protocol that enables LLM apps to discover and call external tools and data sources. The MCP Vibe Inspector is a debugging UI to explore, validate, and troubleshoot MCP servers.
+
+## 🛠 Development
+
+```bash
+git clone https://github.com/abcSTARK/vscode-mcp-debugger
+cd vscode-mcp-debugger
+npm install
+# Press F5 in VS Code to launch the Extension Development Host
+```
+
+Build/lint/test:
 
 ```bash
 npm run compile
-```
-
-### Linting
-
-```bash
 npm run lint
-```
-
-### Testing
-
-```bash
 npm test
 ```
 
-## Extension Settings
+## 🤝 Contributing
 
-This extension contributes the following settings:
+Issues and PRs are welcome. See `CONTRIBUTING.md` and `CODE_OF_CONDUCT.md`.
 
-* `mcpDebugger.inspectorUrl`: URL where the MCP Inspector is running (default: `http://localhost:3000`)
+## 🔒 Security
 
-## Contributing
+Please see `SECURITY.md` for how to report a vulnerability.
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+## 📄 License
 
-## License
-
-This extension is released under the MIT License.
+MIT © 2025 abcSTARK

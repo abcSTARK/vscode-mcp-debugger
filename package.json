@@ -1,27 +1,65 @@
 {
   "name": "mcp-debugger",
-  "displayName": "MCP Debugger",
-  "description": "A VSCode extension for debugging MCP (Model Context Protocol) servers",
-  "version": "0.0.1",
+  "displayName": "MCP Vibe Inspector",
+  "description": "Debug and inspect Model Context Protocol (MCP) servers right inside VS Code.",
+  "version": "1.0.0",
+  "publisher": "abcSTARK",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abcSTARK/vscode-mcp-debugger"
+  },
+  "bugs": {
+    "url": "https://github.com/abcSTARK/vscode-mcp-debugger/issues"
+  },
+  "homepage": "https://github.com/abcSTARK/vscode-mcp-debugger#readme",
   "engines": {
     "vscode": "^1.104.0"
   },
   "categories": [
     "Other"
   ],
+  "icon": "media/icon.png",
+  "keywords": [
+    "mcp",
+    "model context protocol",
+    "inspector",
+    "debugger",
+    "ai",
+    "llm",
+    "tools"
+  ],
+  "galleryBanner": {
+    "color": "#1f2228",
+    "theme": "dark"
+  },
   "main": "./out/extension.js",
+  "activationEvents": [
+    "onCommand:mcp-debugger.openInspector",
+    "onCommand:mcp-debugger.openInspectorInView",
+    "onView:mcpInspectorSidebarView"
+  ],
+  "files": [
+    "out/**",
+    "media/**",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "package.json"
+  ],
+  
   "contributes": {
     "commands": [
       {
         "command": "mcp-debugger.openInspector",
-        "title": "Open MCP Inspector",
-        "category": "MCP Debugger"
+        "title": "Open MCP Vibe Inspector",
+        "category": "MCP Vibe Inspector"
       }
       ,
       {
         "command": "mcp-debugger.openInspectorInView",
-        "title": "Open MCP Inspector (Activity View)",
-        "category": "MCP Debugger"
+        "title": "Open MCP Vibe Inspector (Activity View)",
+        "category": "MCP Vibe Inspector"
       }
     ],
     "menus": {
@@ -36,7 +74,7 @@
       "activitybar": [
         {
           "id": "mcpDebugger",
-          "title": "MCP",
+          "title": "MCP Vibe Inspector",
           "icon": "media/mcp.svg"
         }
       ]
@@ -45,7 +83,7 @@
       "mcpDebugger": [
         {
           "id": "mcpInspectorSidebarView",
-          "name": "MCP Inspector Sidebar",
+          "name": "MCP Vibe Inspector Sidebar",
           "type": "webview",
           "icon": "$(debug-alt)",
           "when": "true"
@@ -53,12 +91,12 @@
       ]
     },
     "configuration": {
-      "title": "MCP Debugger",
+  "title": "MCP Vibe Inspector",
       "properties": {
         "mcpDebugger.inspectorUrl": {
           "type": "string",
           "default": "http://localhost:3000",
-          "description": "URL where the MCP Inspector is running",
+          "description": "URL where the MCP Vibe Inspector is running",
           "pattern": "^https?://.+",
           "patternErrorMessage": "Must be a valid HTTP or HTTPS URL"
         }

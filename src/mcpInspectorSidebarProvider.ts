@@ -76,7 +76,7 @@ export class McpInspectorSidebarProvider implements vscode.WebviewViewProvider {
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>MCP Inspector Sidebar</title>
+                <title>MCP Vibe Inspector Sidebar</title>
                 <style>
                   :root { --padding: 12px; --gap: 10px; }
                   body { color: var(--vscode-editor-foreground); background: transparent; font-family: var(--vscode-font-family); margin:0; }
@@ -107,8 +107,8 @@ export class McpInspectorSidebarProvider implements vscode.WebviewViewProvider {
             <body>
                 <div class="container">
                   <div class="section">
-                    <div class="title"><span class="icon">🚀</span> <div>MCP Inspector</div></div>
-                    <p class="lead">Quickly open the MCP Inspector (use the tokened URL from your terminal).</p>
+                    <div class="title"><span class="icon">🚀</span> <div>MCP Vibe Inspector</div></div>
+                    <p class="lead">Quickly open the MCP Vibe Inspector (use the tokened URL from your terminal).</p>
                   </div>
 
                   <div class="section">
@@ -124,7 +124,7 @@ export class McpInspectorSidebarProvider implements vscode.WebviewViewProvider {
                   <div class="section">
                     <div class="title"><span class="icon">🔗</span> <div>Inspector URL</div></div>
                     <div class="input-row">
-                      <input id="inspectorUrl" class="url-input" type="text" placeholder="Paste MCP Inspector URL here (with token)" value="${safeUrl}" />
+                      <input id="inspectorUrl" class="url-input" type="text" placeholder="Paste MCP Vibe Inspector URL here (with token)" value="${safeUrl}" />
                     </div>
                     <div style="margin-top:8px; display:flex; gap:8px;"><button id="openBtn" class="primary" title="Open Inspector (Enter)">Open Inspector</button></div>
                     <div class="tip">Tip: URL looks like <code>http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=…</code></div>

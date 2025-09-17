@@ -7,7 +7,7 @@ import { McpInspectorSidebarProvider } from './mcpInspectorSidebarProvider';
  * Activate the extension.
  */
 export function activate(context: vscode.ExtensionContext) {
-  console.log('MCP Debugger extension activated');
+  console.log('MCP Vibe Inspector extension activated');
 
   // Register the new sidebar provider
   try {
@@ -83,7 +83,7 @@ export function deactivate() {
 }
 
 /**
- * Manages the MCP Inspector webview panel.
+ * Manages the MCP Vibe Inspector webview panel.
  * Single-panel (singleton) implementation to keep things simple.
  */
 class MCPInspectorPanel {
@@ -144,7 +144,7 @@ class MCPInspectorPanel {
 
     const panel = vscode.window.createWebviewPanel(
       MCPInspectorPanel.viewType,
-      'MCP Inspector',
+      'MCP Vibe Inspector',
       column || vscode.ViewColumn.One,
       {
         enableScripts: true,
@@ -225,7 +225,7 @@ class MCPInspectorPanel {
     // Read the HTML file shipped with the extension
     const htmlPath = join(
       this.context.extensionPath,
-      'src',
+      'media',
       'inspectorWebview.html'
     );
     let html = '';
@@ -242,7 +242,7 @@ class MCPInspectorPanel {
   }
 
   private update() {
-    this.panel.title = 'MCP Inspector';
+    this.panel.title = 'MCP Vibe Inspector';
     this.panel.webview.html = this.getWebviewContent();
   }
 
@@ -262,7 +262,7 @@ class MCPInspectorPanel {
           vscode.workspace
             .getConfiguration('mcpDebugger')
             .update('inspectorUrl', url, vscode.ConfigurationTarget.Global);
-          vscode.window.showInformationMessage('MCP Inspector URL saved.');
+          vscode.window.showInformationMessage('MCP Vibe Inspector URL saved.');
           return;
         }
         break;
