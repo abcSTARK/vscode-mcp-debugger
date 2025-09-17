@@ -81,7 +81,7 @@ export class McpInspectorSidebarProvider implements vscode.WebviewViewProvider {
                   :root { --padding: 12px; --gap: 10px; }
                   body { color: var(--vscode-editor-foreground); background: transparent; font-family: var(--vscode-font-family); margin:0; }
                   .container { padding: var(--padding); box-sizing:border-box; }
-                  .section { margin-bottom: var(--gap); padding-bottom: var(--gap); border-bottom: 1px solid rgba(255,255,255,0.04); }
+                  .section { margin-bottom: var(--gap); padding-bottom: var(--gap); border-bottom: 1px solid var(--vscode-panel-border, rgba(255,255,255,0.06)); }
                   .title { display:flex; align-items:center; gap:8px; font-weight:600; font-size:13px; margin-bottom:6px }
                   .title .icon { width:20px; height:20px; display:inline-flex; align-items:center; justify-content:center }
                   .lead { font-size:12px; color:var(--vscode-descriptionForeground); margin:0 0 8px 0 }
@@ -90,10 +90,11 @@ export class McpInspectorSidebarProvider implements vscode.WebviewViewProvider {
                   .code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Segoe UI Mono', monospace; font-size:12px; color:var(--vscode-editor-foreground); background:transparent; padding:0; border-radius:0; display:inline }
                   /* nested <code> inside .code: accent color and better wrapping for long tokens */
                   .code code { font-family: inherit; font-size: inherit; color: var(--vscode-textLink-foreground); background: transparent; padding: 0; border-radius: 0; overflow-wrap: anywhere; word-break: break-word; }
-                  .copy-btn { margin-left:6px; width:22px; height:22px; display:inline-flex; align-items:center; justify-content:center; font-size:14px; border-radius:4px; border:none; background:transparent; color:var(--vscode-descriptionForeground); cursor:pointer }
-                  .copy-btn:hover { background: var(--vscode-toolbar-hoverBackground); color: var(--vscode-foreground); }
+                  .copy-btn { margin-left:6px; width:22px; height:22px; display:inline-flex; align-items:center; justify-content:center; font-size:14px; border-radius:4px; border:none; background:transparent; color:var(--vscode-descriptionForeground); cursor:pointer; opacity:0.55; transition: opacity .15s ease, background-color .15s ease, color .15s ease }
+                  .code:hover + .copy-btn, .copy-btn:hover, .copy-btn:focus { opacity:1; background: var(--vscode-toolbar-hoverBackground); color: var(--vscode-foreground); }
                   .input-row { display:flex; gap:8px; margin-top:8px }
                   input.url-input { flex:1; padding:8px; border-radius:4px; border:1px solid var(--vscode-input-border); background:var(--vscode-input-background); color:var(--vscode-input-foreground); font-size:13px }
+                  input.url-input.invalid { border-color: var(--vscode-inputValidation-errorBorder); }
                   button.primary { padding:8px 10px; border-radius:4px; border:none; background:var(--vscode-button-background); color:var(--vscode-button-foreground); cursor:pointer; font-weight:600 }
                   .tip { font-size:11px; color:var(--vscode-descriptionForeground); margin-top:8px }
                   @media (max-width:360px) {
@@ -125,7 +126,7 @@ export class McpInspectorSidebarProvider implements vscode.WebviewViewProvider {
                     <div class="input-row">
                       <input id="inspectorUrl" class="url-input" type="text" placeholder="Paste MCP Inspector URL here (with token)" value="${safeUrl}" />
                     </div>
-                    <div style="margin-top:8px; display:flex; gap:8px;"><button id="openBtn" class="primary">Open Inspector</button></div>
+                    <div style="margin-top:8px; display:flex; gap:8px;"><button id="openBtn" class="primary" title="Open Inspector (Enter)">Open Inspector</button></div>
                     <div class="tip">Tip: URL looks like <code>http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=…</code></div>
                   </div>
 
@@ -158,10 +159,19 @@ export class McpInspectorSidebarProvider implements vscode.WebviewViewProvider {
                         el.style.borderRadius = '4px';
                         el.style.transition = 'opacity 0.25s ease';
                         el.style.opacity = '1';
+                        el.setAttribute('role', 'status');
+                        el.setAttribute('aria-live', 'polite');
                         urlInput.parentElement.appendChild(el);
                       }
                       el.textContent = text;
                       el.style.color = type === 'error' ? 'var(--vscode-errorForeground)' : 'var(--vscode-foreground)';
+                      if (type === 'error') {
+                        el.setAttribute('role', 'alert');
+                        el.setAttribute('aria-live', 'assertive');
+                      } else {
+                        el.setAttribute('role', 'status');
+                        el.setAttribute('aria-live', 'polite');
+                      }
                       // auto-hide after 2s for info messages
                       if (type === 'info') {
                         setTimeout(() => { if (el) el.style.opacity = '0'; }, 2000);
@@ -191,9 +201,15 @@ export class McpInspectorSidebarProvider implements vscode.WebviewViewProvider {
                       const url = urlInput.value.trim();
                       const res = validateInspectorUrl(url);
                       if (!res.ok) {
+                        urlInput.classList.add('invalid');
+                        urlInput.setAttribute('aria-invalid', 'true');
+                        urlInput.setAttribute('aria-describedby', 'msg');
                         showMessage(res.message, 'error');
                         return;
                       }
+                      urlInput.classList.remove('invalid');
+                      urlInput.removeAttribute('aria-invalid');
+                      urlInput.removeAttribute('aria-describedby');
                       // send to extension
                       vscode.postMessage({ command: 'openInspector', url });
                       // show ephemeral confirmation
@@ -215,7 +231,7 @@ export class McpInspectorSidebarProvider implements vscode.WebviewViewProvider {
                         btn.className = 'copy-btn';
                         btn.setAttribute('aria-label', 'Copy to clipboard');
                         btn.title = 'Copy to clipboard';
-                        btn.textContent = '📋';
+                        btn.innerHTML = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true" focusable="false"><path d="M6 2h7a1 1 0 0 1 1 1v7h-2V4H6V2z" fill="currentColor" opacity=".45"/><rect x="2" y="4" width="9" height="9" rx="1.5" fill="currentColor"/></svg>';
                         btn.addEventListener('click', () => {
                           const text = c.getAttribute('data-code') || c.textContent || '';
                           navigator.clipboard.writeText(text).catch(() => { showMessage('Copy failed', 'error'); });
