@@ -18,6 +18,16 @@ All notable changes to the "MCP Vibe Inspector" extension will be documented in 
 
 - Packaging and webview template path issues for VSIX installs
 
+## [1.0.1] - 2025-09-18
+
+### Added
+
+- Screenshot(s) added for Marketplace preview and README updates
+
+### Changed
+
+- Minor documentation updates and package metadata bump
+
 ## [0.1.0] - 2025-09-18
 
 ### Added

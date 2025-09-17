@@ -1,5 +1,7 @@
 # MCP Vibe Inspector
 
+![MCP Vibe Inspector screenshot](media/screenshot-1.png)
+
 Debug and inspect Model Context Protocol (MCP) servers right inside VS Code.
 
 This extension embeds the MCP Vibe Inspector in a Webview Panel and provides a lightweight sidebar to quickly configure and launch your Inspector instance—no context switch to the browser needed.
@@ -21,10 +23,14 @@ This extension embeds the MCP Vibe Inspector in a Webview Panel and provides a l
 npx @modelcontextprotocol/inspector
 ```
 
+![MCP Vibe Inspector screenshot](media/screenshot-2.png)
+
 2. Open the Inspector panel:
 
 - Command Palette → “Open MCP Vibe Inspector”
 - Or via the Activity Bar “MCP” view
+
+![MCP Vibe Inspector screenshot](media/screenshot-3.png)
 
 3. Paste or confirm your Inspector URL in the panel header. Example:
 
@@ -38,6 +44,8 @@ http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=…
 
 - `MCP Vibe Inspector: Open MCP Vibe Inspector` (mcp-debugger.openInspector)
 - `MCP Vibe Inspector: Open MCP Vibe Inspector (Activity View)` (mcp-debugger.openInspectorInView)
+
+![MCP Vibe Inspector screenshot](media/screenshot-4.png)
 
 ## ⚙️ Settings
 
