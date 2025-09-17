@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP Inspector</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            font-family: var(--vscode-font-family);
+            background-color: var(--vscode-editor-background);
+            color: var(--vscode-editor-foreground);
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
+            min-height: 0;
+        }
+
+        .header {
+            padding: 10px;
+            background-color: var(--vscode-titleBar-activeBackground);
+            color: var(--vscode-titleBar-activeForeground);
+            border-bottom: 1px solid var(--vscode-widget-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .url-input {
+            padding: 5px 10px;
+            border: 1px solid var(--vscode-input-border);
+            border-radius: 3px;
+            background-color: var(--vscode-input-background);
+            color: var(--vscode-input-foreground);
+            margin: 0 10px;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .reload-btn {
+            padding: 5px 15px;
+            border: 1px solid var(--vscode-button-border);
+            border-radius: 3px;
+            background-color: var(--vscode-button-background);
+            color: var(--vscode-button-foreground);
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .reload-btn:hover {
+            background-color: var(--vscode-button-hoverBackground);
+        }
+
+        #content {
+            flex: 1 1 0;
+            min-height: 0;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .inspector-frame {
+            flex: 1 1 0;
+            min-height: 0;
+            min-width: 0;
+            border: none;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            display: block;
+        }
+
+        .error-message {
+            padding: 20px;
+            text-align: center;
+            color: var(--vscode-errorForeground);
+            background-color: var(--vscode-inputValidation-errorBackground);
+            border: 1px solid var(--vscode-inputValidation-errorBorder);
+            margin: 20px;
+            border-radius: 3px;
+        }
+
+        .info-message {
+            padding: 20px;
+            margin: 20px;
+            background-color: var(--vscode-textBlockQuote-background);
+            border-left: 4px solid var(--vscode-textBlockQuote-border);
+            border-radius: 3px;
+        }
+
+        .info-message h3 {
+            margin-top: 0;
+            color: var(--vscode-textPreformat-foreground);
+        }
+
+        .info-message code {
+            background-color: var(--vscode-textCodeBlock-background);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: var(--vscode-editor-font-family);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <label for="urlInput">MCP Inspector URL:</label>
+            <input type="text" id="urlInput" class="url-input" value="{{INSPECTOR_URL}}" placeholder="http://localhost:3000">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <button id="collapseBtn" class="reload-btn" onclick="toggleCollapse()">Collapse</button>
+                <button class="reload-btn" onclick="reloadInspector()">Reload</button>
+            </div>
+        </div>
+        
+        <div style="padding:8px; display:flex; gap:8px; align-items:center;"></div>
+        <div id="content">
+            <div class="info-message">
+                <h3>Welcome to MCP Inspector</h3>
+                <p>This panel displays the MCP (Model Context Protocol) Inspector interface for debugging your local MCP servers.</p>
+                <p><strong>To get started:</strong></p>
+                <ol>
+                    <li>Run your MCP server locally</li>
+                    <li>Start the MCP inspector with: <code>npx @modelcontextprotocol/inspector</code></li>
+                    <li>The inspector typically runs on <code>http://localhost:3000</code></li>
+                    <li>Update the URL above if your inspector runs on a different port</li>
+                    <li>Click "Reload" to load the inspector interface</li>
+                </ol>
+                <p>The inspector allows you to test and debug your MCP server by examining available tools, resources, and prompts.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const vscode = acquireVsCodeApi();
+        
+        function reloadInspector() {
+            const urlInput = document.getElementById('urlInput');
+            const url = urlInput.value.trim();
+            if (!url) {
+                showInlineError('Please enter a valid URL');
+                return;
+            }
+            loadInspector(url);
+        }
+        
+        function loadInspector(url) {
+            const contentDiv = document.getElementById('content');
+            // Create iframe for the inspector
+            const iframe = document.createElement('iframe');
+            iframe.className = 'inspector-frame';
+            iframe.src = url;
+            // Allow clipboard operations and make the iframe focusable so keyboard
+            // events (copy/paste) propagate correctly.
+            iframe.setAttribute('allow', 'clipboard-read; clipboard-write;');
+            iframe.setAttribute('tabindex', '0');
+            iframe.onload = function() {
+                console.log('MCP Inspector loaded successfully');
+                // Focus the iframe so keyboard events go to the inspector by default
+                try { iframe.focus(); } catch (e) { /* ignore */ }
+            };
+            iframe.onerror = function() {
+                showError('Failed to load MCP Inspector. Please ensure the inspector is running and accessible.');
+            };
+            contentDiv.innerHTML = '';
+            contentDiv.appendChild(iframe);
+
+            // Persist last loaded URL into the webview state so it can be
+            // restored by the extension's serializer.
+            try {
+                    const state = { lastUrl: url, collapsed: window.__collapsed };
+                vscode.setState(state);
+                // Also notify the extension so it can persist state across view collapses
+                vscode.postMessage({ command: 'saveState', state });
+            } catch (e) {
+                // ignore if unavailable
+            }
+        }
+
+        function toggleCollapse() {
+            window.__collapsed = !window.__collapsed;
+            const contentDiv = document.getElementById('content');
+            const collapseBtn = document.getElementById('collapseBtn');
+            if (window.__collapsed) {
+                // hide inspector and show a small placeholder
+                contentDiv.innerHTML = '<div style="padding:20px;">Inspector collapsed. Click Expand to restore.</div>';
+                collapseBtn.textContent = 'Expand';
+            } else {
+                // Try to reload last URL or default
+                collapseBtn.textContent = 'Collapse';
+                const urlInput = document.getElementById('urlInput');
+                if (urlInput.value) loadInspector(urlInput.value);
+            }
+            try {
+                    const state = { lastUrl: document.getElementById('urlInput').value, collapsed: window.__collapsed };
+                vscode.setState(state);
+                vscode.postMessage({ command: 'saveState', state });
+            } catch (e) {
+                // ignore
+            }
+        }
+        
+        function showError(message) {
+            const contentDiv = document.getElementById('content');
+            contentDiv.innerHTML = `
+                <div class="error-message">
+                    <h3>Error</h3>
+                    <p>${message}</p>
+                    <p>Make sure you have started the MCP inspector with:</p>
+                    <p><code>npx @modelcontextprotocol/inspector</code></p>
+                </div>
+            `;
+        }
+
+        function showInlineError(message) {
+            const header = document.querySelector('.header');
+            let el = document.getElementById('inlineError');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'inlineError';
+                el.style.color = 'var(--vscode-errorForeground)';
+                el.style.marginLeft = '12px';
+                header.appendChild(el);
+            }
+            el.textContent = message;
+            setTimeout(() => { if (el) el.textContent = ''; }, 5000);
+        }
+        
+        // Save URL changes to VSCode settings
+        document.getElementById('urlInput').addEventListener('change', function(e) {
+            vscode.postMessage({
+                command: 'updateUrl',
+                url: e.target.value
+            });
+        });
+
+        // tabs
+        function setTab(name) {
+            window.__activeTab = name;
+            try {
+                const state = { lastUrl: document.getElementById('urlInput').value, collapsed: window.__collapsed || false, activeTab: window.__activeTab || 'overview' };
+                vscode.setState(state);
+                vscode.postMessage({ command: 'saveState', state });
+            } catch (e) {}
+            // For demo purposes we don't actually change inspector content — UI only
+            showInlineError('Switched to ' + name);
+        }
+        
+        // Load inspector automatically if URL looks valid
+        const urlInput = document.getElementById('urlInput');
+        if (urlInput.value && urlInput.value !== 'http://localhost:3000') {
+            loadInspector(urlInput.value);
+        }
+
+        // Listen for messages from the extension (e.g., validation errors)
+        window.addEventListener('message', event => {
+            const msg = event.data;
+            if (msg.command === 'urlError') {
+                showInlineError(msg.text || 'Invalid URL');
+            } else if (msg.command === 'restoreState') {
+                // Received saved state from the extension during panel restore
+                try {
+                    const s = msg.state || {};
+                    const lastUrl = s.lastUrl || (s.webview && s.webview.lastUrl) || null;
+                    if (lastUrl) {
+                        const urlInput = document.getElementById('urlInput');
+                        urlInput.value = lastUrl;
+                        if (!s.collapsed) {
+                            loadInspector(lastUrl);
+                        } else {
+                            // show collapsed placeholder
+                            window.__collapsed = true;
+                            const contentDiv = document.getElementById('content');
+                            contentDiv.innerHTML = '<div style="padding:20px;">Inspector collapsed. Click Expand to restore.</div>';
+                            const collapseBtn = document.getElementById('collapseBtn');
+                            if (collapseBtn) collapseBtn.textContent = 'Expand';
+                        }
+                    }
+
+                    // show a small transient toast when restored
+                    if (msg.restored) {
+                        showRestoreToast();
+                    }
+                } catch (e) {
+                    // ignore
+                }
+            }
+        });
+        
+        // Restore any state previously saved with acquireVsCodeApi().getState()
+        try {
+            const prev = vscode.getState && vscode.getState();
+            if (prev && prev.lastUrl) {
+                const urlInput = document.getElementById('urlInput');
+                urlInput.value = prev.lastUrl;
+                loadInspector(prev.lastUrl);
+            }
+        } catch (e) {
+            // ignore
+        }
+
+            // No tabs to restore
+
+        function showRestoreToast() {
+            const el = document.createElement('div');
+            el.textContent = 'Restored from last session';
+            el.style.position = 'fixed';
+            el.style.bottom = '12px';
+            el.style.right = '12px';
+            el.style.padding = '8px 12px';
+            el.style.background = 'var(--vscode-notification-background)';
+            el.style.color = 'var(--vscode-notification-foreground)';
+            el.style.border = '1px solid var(--vscode-notification-border)';
+            el.style.borderRadius = '4px';
+            el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+            document.body.appendChild(el);
+            setTimeout(() => { try { el.remove(); } catch (e) {} }, 3500);
+        }
+    </script>
+</body>
+</html>

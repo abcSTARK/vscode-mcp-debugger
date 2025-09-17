@@ -18,12 +18,35 @@
         "title": "Open MCP Inspector",
         "category": "MCP Debugger"
       }
+      ,
+      {
+        "command": "mcp-debugger.openInspectorInView",
+        "title": "Open MCP Inspector (Activity View)",
+        "category": "MCP Debugger"
+      }
     ],
     "menus": {
       "commandPalette": [
         {
           "command": "mcp-debugger.openInspector",
           "when": "true"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "mcpDebugger",
+          "title": "MCP",
+          "icon": "media/mcp.svg"
+        }
+      ]
+    },
+    "views": {
+      "mcpDebugger": [
+        {
+          "id": "mcpDebuggerView",
+          "name": "MCP Inspector"
         }
       ]
     },
