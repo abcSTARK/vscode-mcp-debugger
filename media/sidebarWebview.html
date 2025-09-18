@@ -1,34 +1,21 @@
-<div class="tip" style="margin-bottom: 12px">
-  <strong
-    >If the <em>Start Inspector (one click)</em> button does not work,</strong
-  >
-  run the following command manually in your terminal, then continue with the
-  steps below:
-  <div
-    class="code"
-    data-code="npx @modelcontextprotocol/inspector"
-    style="display: inline-block; margin: 6px 0 0 0"
-  >
-    <code>npx @modelcontextprotocol/inspector</code>
-  </div>
-</div>
-<!-- MCP VIBE INSPECTOR SIDEBAR -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>MCP Vibe Inspector Sidebar</title>
     <style>
       :root {
         --padding: 12px;
-        --gap: 10px;
+        --gap: 12px;
       }
+      html,
       body {
-        color: var(--vscode-editor-foreground);
-        background: transparent;
-        font-family: var(--vscode-font-family);
         margin: 0;
+        padding: 0;
+        background: transparent;
+        color: var(--vscode-editor-foreground);
+        font-family: var(--vscode-font-family);
       }
       .container {
         padding: var(--padding);
@@ -36,9 +23,6 @@
       }
       .section {
         margin-bottom: var(--gap);
-        padding-bottom: var(--gap);
-        border-bottom: 1px solid
-          var(--vscode-panel-border, rgba(255, 255, 255, 0.06));
       }
       .title {
         display: flex;
@@ -46,115 +30,63 @@
         gap: 8px;
         font-weight: 600;
         font-size: 13px;
-        margin-bottom: 6px;
       }
-      .title .icon {
-        width: 20px;
-        height: 20px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
+      .primary {
+        width: 100%;
+        padding: 8px 10px;
+        border-radius: 6px;
+        border: none;
+        background: var(--vscode-button-background);
+        color: var(--vscode-button-foreground);
+        cursor: pointer;
+        font-weight: 700;
       }
-      .lead {
-        font-size: 12px;
+      .muted {
         color: var(--vscode-descriptionForeground);
-        margin: 0 0 8px 0;
-      }
-      .steps {
         font-size: 12px;
-        margin: 0;
-        padding-left: 18px;
-      }
-      .steps li {
-        margin: 6px 0;
       }
       .code {
         font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono',
           'Segoe UI Mono', monospace;
         font-size: 12px;
-        color: var(--vscode-editor-foreground);
-        background: transparent;
-        padding: 0;
-        border-radius: 0;
-        display: inline;
-      }
-      .code code {
-        font-family: inherit;
-        font-size: inherit;
         color: var(--vscode-textLink-foreground);
         background: transparent;
-        padding: 0;
-        border-radius: 0;
-        overflow-wrap: anywhere;
-        word-break: break-word;
-      }
-      .copy-btn {
-        margin-left: 6px;
-        width: 22px;
-        height: 22px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
-        border-radius: 4px;
-        border: none;
-        background: transparent;
-        color: var(--vscode-descriptionForeground);
-        cursor: pointer;
-        opacity: 0.55;
-        transition: opacity 0.15s ease, background-color 0.15s ease,
-          color 0.15s ease;
-      }
-      .code:hover + .copy-btn,
-      .copy-btn:hover,
-      .copy-btn:focus {
-        opacity: 1;
-        background: var(--vscode-toolbar-hoverBackground);
-        color: var(--vscode-foreground);
-      }
-      .input-row {
-        display: flex;
-        gap: 8px;
-        margin-top: 8px;
       }
       input.url-input {
-        flex: 1;
+        width: 100%;
         padding: 8px;
-        border-radius: 4px;
+        border-radius: 6px;
         border: 1px solid var(--vscode-input-border);
         background: var(--vscode-input-background);
         color: var(--vscode-input-foreground);
-        font-size: 13px;
+        box-sizing: border-box;
       }
-      input.url-input.invalid {
-        border-color: var(--vscode-inputValidation-errorBorder);
+      .row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
       }
-      button.primary {
-        padding: 8px 10px;
-        border-radius: 4px;
+      .small {
+        font-size: 12px;
+      }
+      .example {
+        margin-top: 6px;
+      }
+      .copy-btn {
+        background: transparent;
         border: none;
-        background: var(--vscode-button-background);
-        color: var(--vscode-button-foreground);
+        color: var(--vscode-textLink-foreground);
         cursor: pointer;
-        font-weight: 600;
+        padding: 4px;
       }
-      .tip {
+      .divider {
+        height: 1px;
+        background: var(--vscode-panel-border);
+        margin: 10px 0;
+      }
+      .foot {
         font-size: 11px;
         color: var(--vscode-descriptionForeground);
-        margin-top: 8px;
-      }
-      @media (max-width: 360px) {
-        .title {
-          font-size: 12px;
-        }
-        input.url-input {
-          font-size: 12px;
-        }
-        .copy-btn {
-          width: 20px;
-          height: 20px;
-          font-size: 12px;
-        }
       }
     </style>
   </head>
@@ -162,247 +94,240 @@
     <div class="container">
       <div class="section">
         <div class="title">
-          <span class="icon">🚀</span>
-          <div>MCP Vibe Inspector</div>
+          <span class="icon">🚀</span><span>MCP Vibe Inspector</span>
         </div>
-        <p class="lead">
-          Quickly open the MCP Vibe Inspector. <br />
-          <strong
-            >After starting the Inspector, copy the URL from your terminal
-            output and paste it below.</strong
-          >
-        </p>
+        <div class="muted small" style="margin-top: 8px">
+          Start the local Inspector and open it here.
+        </div>
       </div>
+
+      <div class="section">
+        <button id="startInspectorBtn" class="primary">Start Inspector</button>
+        <div class="row" style="margin-top: 8px; align-items: center">
+          <div class="muted small">If the button fails, run</div>
+          <div style="flex: 1" class="row">
+            <code id="fallbackCmd" class="code" data-no-auto-copy>
+              npx @modelcontextprotocol/inspector
+            </code>
+            <button
+              id="copyFallback"
+              class="copy-btn"
+              title="Copy command"
+              aria-label="Copy fallback command"
+            >
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 16 16"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M4 2h7a1 1 0 0 1 1 1v1"
+                  stroke="currentColor"
+                  stroke-width="1.25"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <rect
+                  x="3"
+                  y="5"
+                  width="9"
+                  height="9"
+                  rx="1"
+                  stroke="currentColor"
+                  stroke-width="1.25"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div class="section">
         <div class="title">
-          <span class="icon">🪪</span>
-          <div>Quick Start</div>
+          <span class="icon">🔗</span><span>Inspector URL</span>
         </div>
-        <button
-          id="startInspectorBtn"
-          class="primary"
-          style="margin-bottom: 12px; width: 100%"
-        >
-          Start Inspector (one click)
-        </button>
-        <ol class="steps">
-          <li>
-            Click <strong>Start Inspector</strong> above to launch the MCP
-            Inspector server in your terminal.
-          </li>
-          <li>
-            <strong>Copy the Inspector URL</strong> from your terminal output.
-            Example:
-            <div class="code" style="display: block; margin: 6px 0 0 0">
-              <code>http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=xyz</code>
-            </div>
-          </li>
-          <li>
-            <strong>Paste the Inspector URL</strong> below, then click
-            <strong>Open Inspector</strong> to launch the panel.
-          </li>
-        </ol>
-        <script>
-          // Add Start Inspector button logic with diagnostic logging
-          const startInspectorBtn =
-            document.getElementById('startInspectorBtn');
-          if (startInspectorBtn) {
-            startInspectorBtn.addEventListener('click', () => {
-              console.log('[SidebarWebview] Start Inspector button clicked');
-              vscode.postMessage({ command: 'startInspector' });
-              console.log('[SidebarWebview] Posted startInspector message');
-              showMessage('Starting Inspector...', 'info');
-            });
-          }
-        </script>
-      </div>
-      <div class="section">
-        <div class="title">
-          <span class="icon">🔗</span>
-          <div>Inspector URL</div>
-        </div>
-        <div class="input-row">
+        <div style="margin-top: 8px">
           <input
             id="inspectorUrl"
             class="url-input"
-            type="text"
-            placeholder="Paste MCP Vibe Inspector URL here (with token)"
-            value="${inspectorUrl}"
+            placeholder="Paste Inspector URL here (with token)"
           />
-        </div>
-        <div style="margin-top: 8px; display: flex; gap: 8px">
-          <button id="openBtn" class="primary" title="Open Inspector (Enter)">
+          <div class="example small muted">
+            Example:
+            <span class="code"
+              >http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=xyz</span
+            >
+          </div>
+          <button id="openBtn" class="primary" style="margin-top: 8px">
             Open Inspector
           </button>
         </div>
-        <div class="tip">
-          <strong>Tip:</strong> The Inspector URL will be printed in your
-          terminal after starting the Inspector. It looks like:
-          <code>http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=xyz</code>
-        </div>
       </div>
-      <div class="section">
-        <div class="title">
-          <span class="icon">🧭</span>
-          <div>MCP Server</div>
-        </div>
-        <p class="lead">
+
+      <div class="divider"></div>
+
+      <div class="section foot">
+        <div style="font-weight: 600">MCP Server (optional)</div>
+        <div style="margin-top: 8px" class="muted small">
           Provide your MCP server transport and URL to connect from the
-          inspector.
-        </p>
-        <div style="margin-top: 8px">
-          <ol
-            style="
-              padding-left: 18px;
-              margin: 0;
-              font-size: 13px;
-              line-height: 1.4;
-            "
-          >
-            <li>
-              <strong>Select transport</strong> — choose one in the Inspector
-              panel:
-              <ul style="margin: 6px 0 0 18px">
-                <li>
-                  <span class="code" data-code="stdio"><code>stdio</code></span>
-                </li>
-                <li>
-                  <span class="code" data-code="streamable-http"
-                    ><code>streamable-http</code></span
-                  >
-                </li>
-                <li>
-                  <span class="code" data-code="sse"><code>sse</code></span>
-                </li>
-              </ul>
-            </li>
-            <li style="margin-top: 8px">
-              <strong>Provide URL</strong> — paste your MCP server URL inside
-              the Inspector (example shown):
-              <div style="margin-top: 6px">
-                <span
-                  class="code"
-                  data-code="https://abcstark-server.fastmcp.app/mcp"
-                  ><code>https://abcstark-server.fastmcp.app/mcp</code></span
-                >
-              </div>
-            </li>
-            <li style="margin-top: 8px">
-              <strong>Click Connect</strong> — the Inspector will use the chosen
-              transport and URL to connect.
-            </li>
-          </ol>
+          Inspector. Follow the steps below inside the Inspector panel:
         </div>
+
+        <ol
+          style="
+            margin-top: 8px;
+            padding-left: 18px;
+            font-size: 13px;
+            line-height: 1.45;
+          "
+        >
+          <li>
+            <strong>Select transport</strong> — choose one in the Inspector
+            panel:
+            <ul style="margin: 6px 0 0 18px">
+              <li><code class="code">stdio</code></li>
+              <li><code class="code">streamable-http</code></li>
+              <li><code class="code">sse</code></li>
+            </ul>
+          </li>
+          <li style="margin-top: 8px">
+            <strong>Provide URL</strong> — paste your MCP server URL inside the
+            Inspector (example shown):
+            <div class="example" style="margin-top: 6px">
+              <code class="code">https://abcstark-server.fastmcp.app/mcp</code>
+            </div>
+          </li>
+          <li style="margin-top: 8px">
+            <strong>Click Connect</strong> — the Inspector will use the chosen
+            transport and URL to connect.
+          </li>
+        </ol>
       </div>
     </div>
+
     <script>
       const vscode = acquireVsCodeApi();
+      const startBtn = document.getElementById('startInspectorBtn');
+      const copyFallback = document.getElementById('copyFallback');
+      const fallbackCmd = document
+        .getElementById('fallbackCmd')
+        .textContent.trim();
       const openBtn = document.getElementById('openBtn');
       const urlInput = document.getElementById('inspectorUrl');
-      function showMessage(text, type = 'info') {
-        let el = document.getElementById('msg');
+
+      // transient in-view status message (accessible)
+      function showTransient(text, type = 'info') {
+        let el = document.getElementById('mcp-msg');
         if (!el) {
           el = document.createElement('div');
-          el.id = 'msg';
-          el.style.marginTop = '8px';
-          el.style.fontSize = '12px';
-          el.style.padding = '6px 8px';
-          el.style.borderRadius = '4px';
-          el.style.transition = 'opacity 0.25s ease';
-          el.style.opacity = '1';
+          el.id = 'mcp-msg';
           el.setAttribute('role', 'status');
           el.setAttribute('aria-live', 'polite');
-          urlInput.parentElement.appendChild(el);
+          el.style.position = 'fixed';
+          el.style.right = '12px';
+          el.style.bottom = '12px';
+          el.style.padding = '8px 10px';
+          el.style.borderRadius = '6px';
+          el.style.boxShadow = '0 6px 18px rgba(0,0,0,0.4)';
+          el.style.zIndex = '9999';
+          el.style.transition = 'opacity 0.25s ease';
+          document.body.appendChild(el);
         }
         el.textContent = text;
-        el.style.color =
+        el.style.background =
           type === 'error'
-            ? 'var(--vscode-errorForeground)'
-            : 'var(--vscode-foreground)';
-        if (type === 'error') {
-          el.setAttribute('role', 'alert');
-          el.setAttribute('aria-live', 'assertive');
-        } else {
-          el.setAttribute('role', 'status');
-          el.setAttribute('aria-live', 'polite');
-        }
-        if (type === 'info') {
-          setTimeout(() => {
-            if (el) el.style.opacity = '0';
-          }, 2000);
-          setTimeout(() => {
-            if (el && el.parentElement) el.parentElement.removeChild(el);
-          }, 2600);
-        }
+            ? 'var(--vscode-inputValidation-errorBackground)'
+            : 'var(--vscode-input-background)';
+        el.style.color = 'var(--vscode-foreground)';
+        el.style.opacity = '1';
+        if (window._mcpMsgTimer) clearTimeout(window._mcpMsgTimer);
+        window._mcpMsgTimer = setTimeout(() => {
+          el.style.opacity = '0';
+        }, 2000);
       }
-      function validateInspectorUrl(v) {
-        if (!v)
-          return { ok: false, message: 'Please paste the inspector URL.' };
+
+      startBtn?.setAttribute('aria-label', 'Start Inspector');
+      startBtn?.addEventListener('click', () => {
+        vscode.postMessage({ command: 'startInspector' });
+        showTransient('Starting Inspector...');
+      });
+
+      copyFallback?.addEventListener('click', async () => {
         try {
-          const parsed = new URL(v);
-          if (!/^https?:$/.test(parsed.protocol)) {
-            return {
-              ok: false,
-              message: 'URL must start with http:// or https://.',
-            };
-          }
-          if (!parsed.searchParams.has('MCP_PROXY_AUTH_TOKEN')) {
-            return {
-              ok: false,
-              message: 'URL is missing MCP_PROXY_AUTH_TOKEN query parameter.',
-            };
-          }
-          return { ok: true };
+          await navigator.clipboard.writeText(fallbackCmd);
+          showTransient('Command copied');
         } catch (e) {
-          return { ok: false, message: 'Invalid URL format.' };
+          showTransient('Copy failed', 'error');
         }
-      }
-      openBtn.addEventListener('click', () => {
+      });
+
+      openBtn?.addEventListener('click', () => {
         const url = urlInput.value.trim();
-        const res = validateInspectorUrl(url);
-        if (!res.ok) {
-          urlInput.classList.add('invalid');
-          urlInput.setAttribute('aria-invalid', 'true');
-          urlInput.setAttribute('aria-describedby', 'msg');
-          showMessage(res.message, 'error');
+        try {
+          const parsed = new URL(url);
+          if (!/^https?:$/.test(parsed.protocol))
+            throw new Error('Invalid protocol');
+          if (!parsed.searchParams.has('MCP_PROXY_AUTH_TOKEN'))
+            throw new Error('Missing token param');
+        } catch (e) {
+          showTransient(
+            'Enter a valid Inspector URL (with MCP_PROXY_AUTH_TOKEN)',
+            'error'
+          );
           return;
         }
-        urlInput.classList.remove('invalid');
-        urlInput.removeAttribute('aria-invalid');
-        urlInput.removeAttribute('aria-describedby');
         vscode.postMessage({ command: 'openInspector', url });
-        showMessage('Saved and opened', 'info');
+        showTransient('Opening Inspector...');
       });
-      urlInput.addEventListener('keydown', (ev) => {
-        if (ev.key === 'Enter') {
-          openBtn.click();
-        }
-      });
-      function addCopyButtons() {
-        const codes = document.querySelectorAll('.code[data-code]');
+
+      // make code snippets copyable via small copy buttons
+      (function attachSnippetCopy() {
+        const copySvg =
+          '<svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 2h7a1 1 0 0 1 1 1v1" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/><rect x="3" y="5" width="9" height="9" rx="1" stroke="currentColor" stroke-width="1.25"/></svg>';
+        const codes = document.querySelectorAll('.code');
         codes.forEach((c) => {
+          // skip explicit no-auto-copy snippets (fallback) or if a copy button already exists nearby
+          if (c.hasAttribute('data-no-auto-copy')) return;
+          if (c.id === 'fallbackCmd') return;
           if (
-            c.nextSibling &&
-            c.nextSibling.classList &&
-            c.nextSibling.classList.contains('copy-btn')
+            c.nextElementSibling &&
+            c.nextElementSibling.classList &&
+            c.nextElementSibling.classList.contains('copy-btn')
+          )
+            return;
+          if (
+            c.parentNode &&
+            c.parentNode.querySelector &&
+            c.parentNode.querySelector('.copy-btn')
           )
             return;
           const btn = document.createElement('button');
           btn.className = 'copy-btn';
-          btn.setAttribute('aria-label', 'Copy to clipboard');
-          btn.title = 'Copy to clipboard';
-          btn.innerHTML =
-            '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true" focusable="false"><path d="M6 2h7a1 1 0 0 1 1 1v7h-2V4H6V2z" fill="currentColor" opacity=".45"/><rect x="2" y="4" width="9" height="9" rx="1.5" fill="currentColor"/></svg>';
-          btn.addEventListener('click', () => {
-            const text = c.getAttribute('data-code') || c.textContent || '';
-            navigator.clipboard.writeText(text).catch(() => {
-              showMessage('Copy failed', 'error');
-            });
+          btn.setAttribute('aria-label', 'Copy snippet');
+          btn.title = 'Copy';
+          btn.innerHTML = copySvg;
+          btn.addEventListener('click', async () => {
+            try {
+              await navigator.clipboard.writeText((c.textContent || '').trim());
+              showTransient('Copied');
+            } catch (e) {
+              showTransient('Copy failed', 'error');
+            }
           });
-          c.parentElement.insertBefore(btn, c.nextSibling);
+          c.parentNode.insertBefore(btn, c.nextSibling);
         });
-      }
-      addCopyButtons();
+      })();
+
+      // listen for messages from extension (optional)
+      window.addEventListener('message', (ev) => {
+        const msg = ev.data;
+        if (msg?.command === 'setInspectorUrl' && msg.url) {
+          urlInput.value = msg.url;
+          showTransient('Inspector URL filled');
+        }
+      });
     </script>
   </body>
 </html>
