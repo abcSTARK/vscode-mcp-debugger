@@ -39,14 +39,6 @@
     "onCommand:mcp-debugger.openInspectorInView",
     "onView:mcpInspectorSidebarView"
   ],
-  "files": [
-    "out/**",
-    "media/**",
-    "README.md",
-    "CHANGELOG.md",
-    "LICENSE",
-    "package.json"
-  ],
   
   "contributes": {
     "commands": [
