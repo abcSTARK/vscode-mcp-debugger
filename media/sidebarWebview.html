@@ -1,3 +1,7 @@
+// Listen for messages from extension to update inspector URL
+window.addEventListener('message', (event) => { const msg = event.data; if (msg
+&& msg.command === 'setInspectorUrl' && msg.url) { urlInput.value = msg.url;
+showMessage('Inspector URL auto-filled!', 'info'); } });
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -158,30 +162,36 @@
       <div class="section">
         <div class="title">
           <span class="icon">🪪</span>
-          <div>Steps</div>
+          <div>Quick Start</div>
         </div>
+        <button
+          id="startInspectorBtn"
+          class="primary"
+          style="margin-bottom: 12px; width: 100%"
+        >
+          Start Inspector (one click)
+        </button>
         <ol class="steps">
-          <li>Run your MCP server locally.</li>
           <li>
-            Start the inspector:
-            <span class="code" data-code="npx @modelcontextprotocol/inspector"
-              ><code>npx @modelcontextprotocol/inspector</code></span
-            >
+            Click <strong>Start Inspector</strong> above to launch the MCP
+            Inspector server.
           </li>
-          <li>
-            Copy the full URL printed in terminal e.g.
-            <span
-              class="code"
-              data-code="http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=TokenData"
-              ><code
-                >http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=TokenData</code
-              ></span
-            >.
-          </li>
-          <li>
-            Paste the URL below and click <strong>Open Inspector</strong>.
-          </li>
+          <li>The Inspector URL will be auto-filled below when ready.</li>
+          <li>Click <strong>Open Inspector</strong> to launch the panel.</li>
         </ol>
+        <script>
+          // Add Start Inspector button logic with diagnostic logging
+          const startInspectorBtn =
+            document.getElementById('startInspectorBtn');
+          if (startInspectorBtn) {
+            startInspectorBtn.addEventListener('click', () => {
+              console.log('[SidebarWebview] Start Inspector button clicked');
+              vscode.postMessage({ command: 'startInspector' });
+              console.log('[SidebarWebview] Posted startInspector message');
+              showMessage('Starting Inspector...', 'info');
+            });
+          }
+        </script>
       </div>
       <div class="section">
         <div class="title">

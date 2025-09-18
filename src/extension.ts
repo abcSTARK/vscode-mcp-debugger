@@ -1,73 +1,120 @@
 import * as vscode from 'vscode';
-import { readFileSync } from 'fs';
-import { join } from 'path';
 import { McpInspectorSidebarProvider } from './mcpInspectorSidebarProvider';
+import { MCPInspectorPanel } from './MCPInspectorPanel';
 
-// --- MCPInspectorPanel class ---
-
-// Remove duplicate class definition and keep only one MCPInspectorPanel class
-// Make constructor public and isValidUrl static method public
-
-/**
- * Activate the extension.
- */
 export function activate(context: vscode.ExtensionContext) {
-  console.log('MCP Vibe Inspector extension activated');
+  // Register the sidebar provider
+  const provider = new McpInspectorSidebarProvider();
+  const registration = vscode.window.registerWebviewViewProvider(
+    'mcpInspectorSidebarView',
+    provider,
+    {
+      webviewOptions: {
+        retainContextWhenHidden: true,
+      },
+    }
+  );
+  context.subscriptions.push(registration);
 
-  // Register the new sidebar provider
-  try {
-    const provider = new McpInspectorSidebarProvider();
-    const registration = vscode.window.registerWebviewViewProvider(
-      'mcpInspectorSidebarView',
-      provider,
-      {
-        webviewOptions: {
-          retainContextWhenHidden: true,
-        },
+  // Minimal test command for debugging terminal creation
+  const testTerminalCmd = vscode.commands.registerCommand(
+    'mcp-debugger.testTerminal',
+    () => {
+      const terminal = vscode.window.createTerminal('MCP Test Terminal');
+      terminal.show();
+      terminal.sendText('echo "Hello from MCP Test Terminal!"');
+      terminal.sendText('ls -l');
+    }
+  );
+  context.subscriptions.push(testTerminalCmd);
+
+  // Inspector sidebar registration for URL updates
+  let sidebarWebviewPanel: vscode.WebviewView | undefined;
+  (globalThis as any).__mcpSidebarWebview = (panel: vscode.WebviewView) => {
+    sidebarWebviewPanel = panel;
+  };
+
+  // Start Inspector command
+  const startInspectorCmd = vscode.commands.registerCommand(
+    'mcp-debugger.startInspector',
+    async () => {
+      const terminal = vscode.window.createTerminal({
+        name: 'MCP Inspector',
+        hideFromUser: false,
+      });
+      terminal.show();
+      // Use shellIntegration if available
+      // @ts-ignore
+      if (
+        terminal.shellIntegration &&
+        typeof terminal.shellIntegration.executeCommand === 'function'
+      ) {
+        // @ts-ignore
+        terminal.shellIntegration.executeCommand(
+          'npx @modelcontextprotocol/inspector'
+        );
+      } else {
+        terminal.sendText('npx @modelcontextprotocol/inspector');
       }
-    );
-    context.subscriptions.push(registration);
-    console.log(
-      'Sidebar provider registered successfully for view: mcpInspectorSidebarView'
-    );
-  } catch (error) {
-    console.error('Failed to register sidebar provider:', error);
-    vscode.window.showErrorMessage(
-      'Failed to register MCP sidebar provider: ' + error
-    );
-  }
+      // Poll for the URL in the config and send to sidebar when available
+      let attempts = 0;
+      const maxAttempts = 20;
+      const poll = async () => {
+        attempts++;
+        const config = vscode.workspace.getConfiguration('mcpDebugger');
+        let url = (config.get<string>('inspectorUrl') || '').toString();
+        if (url && url.startsWith('http')) {
+          if (sidebarWebviewPanel) {
+            sidebarWebviewPanel.webview.postMessage({
+              command: 'setInspectorUrl',
+              url,
+            });
+          }
+          vscode.window.showInformationMessage(
+            'MCP Inspector started. URL auto-populated.'
+          );
+          return;
+        }
+        if (attempts < maxAttempts) {
+          setTimeout(poll, 500);
+        } else {
+          vscode.window.showWarningMessage(
+            'Inspector started, but URL was not detected. Please copy it manually from the terminal.'
+          );
+        }
+      };
+      poll();
+    }
+  );
+  context.subscriptions.push(startInspectorCmd);
 
-  // Command to open the inspector in a standalone webview panel
+  // Open Inspector command
   const openCmd = vscode.commands.registerCommand(
     'mcp-debugger.openInspector',
     () => MCPInspectorPanel.createNew(context.extensionUri, context)
   );
+  context.subscriptions.push(openCmd);
 
-  // Command to reveal the activity-bar view
+  // Open Inspector in View command
   const openInViewCmd = vscode.commands.registerCommand(
     'mcp-debugger.openInspectorInView',
     async () => {
-      // Try to open the activity bar container for our extension
       try {
         await vscode.commands.executeCommand(
           'workbench.view.extension.mcpDebugger'
         );
       } catch (err) {
-        // Fallback: show a new panel instead
         MCPInspectorPanel.createNew(context.extensionUri, context);
       }
     }
   );
-
-  context.subscriptions.push(openCmd, openInViewCmd);
+  context.subscriptions.push(openInViewCmd);
 
   // Register a serializer so the webview panel can be restored across reloads
   if (vscode.window.registerWebviewPanelSerializer) {
     context.subscriptions.push(
       vscode.window.registerWebviewPanelSerializer(MCPInspectorPanel.viewType, {
         async deserializeWebviewPanel(webviewPanel, state) {
-          // Recreate our panel and forward the saved webview state so the
-          // webview can restore things like the last loaded URL.
           MCPInspectorPanel.revive(
             webviewPanel,
             context.extensionUri,
@@ -80,220 +127,6 @@ export function activate(context: vscode.ExtensionContext) {
   }
 }
 
-/**
- * Deactivate the extension.
- */
 export function deactivate() {
   // noop
-}
-
-/**
- * Manages the MCP Vibe Inspector webview panel.
- * Single-panel (singleton) implementation to keep things simple.
- */
-
-class MCPInspectorPanel {
-  public static readonly viewType = 'mcpInspector';
-
-  private readonly panel: vscode.WebviewPanel;
-  private readonly extensionUri: vscode.Uri;
-  private context: vscode.ExtensionContext;
-  private disposables: vscode.Disposable[] = [];
-
-  private constructor(
-    panel: vscode.WebviewPanel,
-    extensionUri: vscode.Uri,
-    context: vscode.ExtensionContext
-  ) {
-    this.panel = panel;
-    this.extensionUri = extensionUri;
-    this.context = context;
-
-    // Set an initial HTML content
-    this.update();
-
-    // Handle disposal
-    this.panel.onDidDispose(() => this.dispose(), null, this.disposables);
-
-    // Update when view becomes visible
-    this.panel.onDidChangeViewState(
-      () => {
-        if (this.panel.visible) {
-          this.update();
-        }
-      },
-      null,
-      this.disposables
-    );
-
-    // Handle messages from the webview
-    this.panel.webview.onDidReceiveMessage(
-      (message) => this.onMessage(message),
-      null,
-      this.disposables
-    );
-  }
-
-  public static createNew(
-    extensionUri: vscode.Uri,
-    context: vscode.ExtensionContext
-  ) {
-    const column = vscode.window.activeTextEditor
-      ? vscode.window.activeTextEditor.viewColumn
-      : undefined;
-
-    const panel = vscode.window.createWebviewPanel(
-      MCPInspectorPanel.viewType,
-      'MCP Vibe Inspector',
-      column || vscode.ViewColumn.One,
-      {
-        enableScripts: true,
-        retainContextWhenHidden: true,
-        localResourceRoots: [
-          vscode.Uri.joinPath(extensionUri, 'src'),
-          vscode.Uri.joinPath(extensionUri, 'media'),
-        ],
-      }
-    );
-
-    new MCPInspectorPanel(panel, extensionUri, context);
-  }
-
-  public static revive(
-    panel: vscode.WebviewPanel,
-    extensionUri: vscode.Uri,
-    context: vscode.ExtensionContext,
-    state?: any
-  ) {
-    const instance = new MCPInspectorPanel(panel, extensionUri, context);
-    if (state) {
-      try {
-        panel.webview.postMessage({
-          command: 'restoreState',
-          state,
-          restored: true,
-          restoredAt: Date.now(),
-        });
-      } catch (e) {
-        // ignore
-      }
-    }
-    return instance;
-  }
-
-  public dispose() {
-    // dispose panel
-    this.panel.dispose();
-    // dispose subscriptions
-    while (this.disposables.length) {
-      const d = this.disposables.pop();
-      if (d) {
-        d.dispose();
-      }
-    }
-  }
-
-  /**
-   * Read the HTML template and replace placeholders.
-   */
-  private getWebviewContent(): string {
-    const config = vscode.workspace.getConfiguration('mcpDebugger');
-    const inspectorUrl = config.get<string>(
-      'inspectorUrl',
-      'http://localhost:3000'
-    );
-
-    // Read the HTML file shipped with the extension
-    const htmlPath = join(
-      this.context.extensionPath,
-      'media',
-      'inspectorWebview.html'
-    );
-    let html = '';
-    try {
-      html = readFileSync(htmlPath, { encoding: 'utf8' });
-    } catch (err) {
-      return `<!doctype html><html><body><h2>Failed to load webview template</h2><pre>${err}</pre></body></html>`;
-    }
-
-    // Replace placeholders
-    html = html.replace(/{{INSPECTOR_URL}}/g, inspectorUrl);
-
-    return html;
-  }
-
-  private update() {
-    this.panel.title = 'MCP Vibe Inspector';
-    this.panel.webview.html = this.getWebviewContent();
-  }
-
-  public onMessage(message: any) {
-    switch (message?.command) {
-      case 'updateUrl': {
-        const url = message.url;
-        if (typeof url === 'string') {
-          if (!MCPInspectorPanel.isValidUrl(url)) {
-            // send back an error message to the webview
-            this.panel.webview.postMessage({
-              command: 'urlError',
-              text: 'Invalid URL. Must start with http:// or https://',
-            });
-            return;
-          }
-          vscode.workspace
-            .getConfiguration('mcpDebugger')
-            .update('inspectorUrl', url, vscode.ConfigurationTarget.Global);
-          vscode.window.showInformationMessage('MCP Vibe Inspector URL saved.');
-          return;
-        }
-        break;
-      }
-      case 'openExternal': {
-        const url = message.url;
-        if (typeof url === 'string' && MCPInspectorPanel.isValidUrl(url)) {
-          try {
-            vscode.env.openExternal(vscode.Uri.parse(url));
-          } catch (e) {
-            vscode.window.showErrorMessage('Failed to open in browser: ' + e);
-          }
-        } else {
-          vscode.window.showErrorMessage('Cannot open: invalid URL.');
-        }
-        break;
-      }
-      case 'alert': {
-        if (message.text) {
-          vscode.window.showErrorMessage(message.text);
-        }
-        break;
-      }
-      default:
-        // Support legacy messages where sender used `type` instead of `command`
-        if (
-          message?.type === 'openExternal' &&
-          typeof message?.url === 'string'
-        ) {
-          const url = message.url;
-          if (MCPInspectorPanel.isValidUrl(url)) {
-            vscode.env.openExternal(vscode.Uri.parse(url));
-          } else {
-            this.panel.webview.postMessage({
-              command: 'urlError',
-              text: 'Invalid URL for openExternal',
-            });
-          }
-          return;
-        }
-        console.warn('Unknown message from webview', message);
-    }
-  }
-
-  private static isValidUrl(url: string) {
-    try {
-      const parsed = new URL(url);
-      return parsed.protocol === 'http:' || parsed.protocol === 'https:';
-    } catch (err) {
-      return false;
-    }
-  }
 }

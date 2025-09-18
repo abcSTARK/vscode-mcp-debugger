@@ -20,13 +20,25 @@ export class McpInspectorSidebarProvider implements vscode.WebviewViewProvider {
       webviewView.webview,
       inspectorUrl
     );
+    // Register the webview with the extension for URL updates
+    try {
+      (globalThis as any).__mcpSidebarWebview?.(webviewView);
+    } catch {}
     // Handle messages from the webview
     webviewView.webview.onDidReceiveMessage(
       async (message) => {
         try {
+          console.log(
+            '[SidebarProvider] Received message from webview:',
+            message
+          );
           switch (message?.command) {
             case 'openInspector': {
               const url = message.url;
+              console.log(
+                '[SidebarProvider] openInspector command received, url:',
+                url
+              );
               if (url && typeof url === 'string') {
                 await vscode.workspace
                   .getConfiguration('mcpDebugger')
@@ -42,6 +54,12 @@ export class McpInspectorSidebarProvider implements vscode.WebviewViewProvider {
             case 'connectMcp': {
               const url = message.url;
               const transport = message.transport;
+              console.log(
+                '[SidebarProvider] connectMcp command received, url:',
+                url,
+                'transport:',
+                transport
+              );
               if (url && typeof url === 'string') {
                 await vscode.workspace
                   .getConfiguration('mcpDebugger')
@@ -56,15 +74,27 @@ export class McpInspectorSidebarProvider implements vscode.WebviewViewProvider {
                     vscode.ConfigurationTarget.Global
                   );
               }
-              // optional: notify any command that handles connection
               vscode.commands.executeCommand('mcp-debugger.connectMcp');
               break;
             }
+            case 'startInspector': {
+              console.log('[SidebarProvider] startInspector command received');
+              await vscode.commands.executeCommand(
+                'mcp-debugger.startInspector'
+              );
+              break;
+            }
             default:
-              console.warn('Unknown message from sidebar webview', message);
+              console.warn(
+                '[SidebarProvider] Unknown message from sidebar webview',
+                message
+              );
           }
         } catch (e) {
-          console.error('Error handling message from sidebar webview', e);
+          console.error(
+            '[SidebarProvider] Error handling message from sidebar webview',
+            e
+          );
         }
       },
       undefined,

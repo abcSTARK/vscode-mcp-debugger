@@ -1,3 +1,10 @@
+
+# [1.1.0] - 2025-09-18
+
+### Added
+
+- New feature: Support for running multiple inspection sessions/tabs simultaneously. This allows users to inspect and debug multiple Model Context Protocol servers in parallel, each in its own tab.
+
 # Change Log
 
 All notable changes to the "MCP Vibe Inspector" extension will be documented in this file.
