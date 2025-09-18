@@ -114,9 +114,7 @@
   "bundledDependencies": [
     "@modelcontextprotocol/inspector"
   ],
-  "dependencies": {
-    "@modelcontextprotocol/inspector": "^1.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/vscode": "^1.104.0",
     "@types/mocha": "^10.0.10",
