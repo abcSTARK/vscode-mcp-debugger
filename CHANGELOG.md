@@ -39,6 +39,17 @@ All notable changes to the "MCP Vibe Inspector" extension will be documented in 
 
 - Removed Paste-to-iframe button and related script
 
+## [1.0.3] - 2025-09-18
+
+### Changed
+
+- Minor UI polish to header labels and tooltips
+- Internal guards to prevent re-entrant loads and stale events
+
+### Fixed
+
+- Reload with invalid URL now clears any previously loaded page and shows an error overlay instead of leaving the old page visible
+
 ## [0.1.0] - 2025-09-18
 
 ### Added
