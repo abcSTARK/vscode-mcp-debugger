@@ -267,6 +267,19 @@ class MCPInspectorPanel {
         }
         break;
       }
+      case 'openExternal': {
+        const url = message.url;
+        if (typeof url === 'string' && MCPInspectorPanel.isValidUrl(url)) {
+          try {
+            vscode.env.openExternal(vscode.Uri.parse(url));
+          } catch (e) {
+            vscode.window.showErrorMessage('Failed to open in browser: ' + e);
+          }
+        } else {
+          vscode.window.showErrorMessage('Cannot open: invalid URL.');
+        }
+        break;
+      }
       case 'alert': {
         if (message.text) {
           vscode.window.showErrorMessage(message.text);
@@ -274,6 +287,22 @@ class MCPInspectorPanel {
         break;
       }
       default:
+        // Support legacy messages where sender used `type` instead of `command`
+        if (
+          message?.type === 'openExternal' &&
+          typeof message?.url === 'string'
+        ) {
+          const url = message.url;
+          if (MCPInspectorPanel.isValidUrl(url)) {
+            vscode.env.openExternal(vscode.Uri.parse(url));
+          } else {
+            this.panel.webview.postMessage({
+              command: 'urlError',
+              text: 'Invalid URL for openExternal',
+            });
+          }
+          return;
+        }
         console.warn('Unknown message from webview', message);
     }
   }

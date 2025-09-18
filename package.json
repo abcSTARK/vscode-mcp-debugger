@@ -2,7 +2,7 @@
   "name": "mcp-debugger",
   "displayName": "MCP Vibe Inspector",
   "description": "Debug and inspect Model Context Protocol (MCP) servers right inside VS Code.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "publisher": "abcSTARK",
   "license": "MIT",
   "repository": {

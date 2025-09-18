@@ -28,6 +28,17 @@ All notable changes to the "MCP Vibe Inspector" extension will be documented in 
 
 - Minor documentation updates and package metadata bump
 
+## [1.0.2] - 2025-09-18
+
+### Changed
+
+- Toolbar button renamed to "Open in Browser" for clarity
+- Reload now clears any previously loaded page when URL validation fails and shows an explicit error overlay
+
+### Removed
+
+- Removed Paste-to-iframe button and related script
+
 ## [0.1.0] - 2025-09-18
 
 ### Added

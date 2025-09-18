@@ -1,443 +1,711 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MCP Vibe Inspector</title>
     <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-            font-family: var(--vscode-font-family);
-            background-color: var(--vscode-editor-background);
-            color: var(--vscode-editor-foreground);
-        }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+        font-family: var(--vscode-font-family);
+        background-color: var(--vscode-editor-background);
+        color: var(--vscode-editor-foreground);
+      }
 
-        .container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            width: 100vw;
-            min-height: 0;
-        }
+      .container {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        width: 100vw;
+        min-height: 0;
+      }
 
-        .header {
-            padding: 8px 10px;
-            background-color: var(--vscode-titleBar-activeBackground);
-            color: var(--vscode-titleBar-activeForeground);
-            border-bottom: 1px solid var(--vscode-widget-border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
+      .header {
+        padding: 8px 10px;
+        background-color: var(--vscode-titleBar-activeBackground);
+        color: var(--vscode-titleBar-activeForeground);
+        border-bottom: 1px solid var(--vscode-widget-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
 
-        .header .left {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex: 1 1 480px;
-            min-width: 240px;
-        }
+      .header .left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 1 1 480px;
+        min-width: 240px;
+      }
 
-        .header .right {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
+      .header .right {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
 
-        .label {
-            font-size: 12px;
-            color: var(--vscode-descriptionForeground);
-            white-space: nowrap;
-        }
+      .label {
+        font-size: 12px;
+        color: var(--vscode-descriptionForeground);
+        white-space: nowrap;
+      }
 
-        .url-input {
-            padding: 6px 10px;
-            border: 1px solid var(--vscode-input-border);
-            border-radius: 4px;
-            background-color: var(--vscode-input-background);
-            color: var(--vscode-input-foreground);
-            flex: 1 1 auto;
-            min-width: 120px;
-            max-width: 640px;
-        }
-        .url-input.invalid { border-color: var(--vscode-inputValidation-errorBorder); }
-        .error-text { font-size: 12px; color: var(--vscode-errorForeground); }
+      .url-input {
+        padding: 6px 10px;
+        border: 1px solid var(--vscode-input-border);
+        border-radius: 4px;
+        background-color: var(--vscode-input-background);
+        color: var(--vscode-input-foreground);
+        flex: 1 1 auto;
+        min-width: 120px;
+        max-width: 640px;
+      }
+      .url-input.invalid {
+        border-color: var(--vscode-inputValidation-errorBorder);
+      }
+      .error-text {
+        font-size: 12px;
+        color: var(--vscode-errorForeground);
+      }
 
+      .btn {
+        height: 28px;
+        padding: 0 10px;
+        border: 1px solid var(--vscode-button-border);
+        border-radius: 4px;
+        background-color: var(--vscode-button-background);
+        color: var(--vscode-button-foreground);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .btn:hover {
+        background-color: var(--vscode-button-hoverBackground);
+      }
+      .btn .icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .btn .label {
+        font-size: 12px;
+      }
+      @media (max-width: 560px) {
+        .btn .label {
+          display: none;
+        }
         .btn {
-            height: 28px;
-            padding: 0 10px;
-            border: 1px solid var(--vscode-button-border);
-            border-radius: 4px;
-            background-color: var(--vscode-button-background);
-            color: var(--vscode-button-foreground);
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+          padding: 0 8px;
         }
-        .btn:hover { background-color: var(--vscode-button-hoverBackground); }
-        .btn .icon { display: inline-flex; align-items: center; justify-content: center; }
-        .btn .label { font-size: 12px; }
-        @media (max-width: 560px) { .btn .label { display:none; } .btn { padding: 0 8px; } }
+      }
 
-        #content {
-            flex: 1 1 0;
-            min-height: 0;
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
+      #content {
+        flex: 1 1 0;
+        min-height: 0;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+      }
 
-        .inspector-frame {
-            flex: 1 1 0;
-            min-height: 0;
-            min-width: 0;
-            border: none;
-            width: 100%;
-            height: 100%;
-            background-color: var(--vscode-editor-background);
-            display: block;
-        }
+      .inspector-frame {
+        flex: 1 1 0;
+        min-height: 0;
+        min-width: 0;
+        border: none;
+        width: 100%;
+        height: 100%;
+        background-color: var(--vscode-editor-background);
+        display: block;
+      }
 
-        .error-message {
-            padding: 20px;
-            text-align: center;
-            color: var(--vscode-errorForeground);
-            background-color: var(--vscode-inputValidation-errorBackground);
-            border: 1px solid var(--vscode-inputValidation-errorBorder);
-            margin: 20px;
-            border-radius: 3px;
-        }
+      .error-message {
+        padding: 20px;
+        text-align: center;
+        color: var(--vscode-errorForeground);
+        background-color: var(--vscode-inputValidation-errorBackground);
+        border: 1px solid var(--vscode-inputValidation-errorBorder);
+        margin: 20px;
+        border-radius: 3px;
+      }
 
-        .info-message {
-            padding: 20px;
-            margin: 20px;
-            background-color: var(--vscode-textBlockQuote-background);
-            border-left: 4px solid var(--vscode-textBlockQuote-border);
-            border-radius: 3px;
-        }
+      .info-message {
+        padding: 20px;
+        margin: 20px;
+        background-color: var(--vscode-textBlockQuote-background);
+        border-left: 4px solid var(--vscode-textBlockQuote-border);
+        border-radius: 3px;
+      }
 
-        .info-message h3 {
-            margin-top: 0;
-            color: var(--vscode-textPreformat-foreground);
-        }
+      .info-message h3 {
+        margin-top: 0;
+        color: var(--vscode-textPreformat-foreground);
+      }
 
-        .info-message code {
-            background-color: var(--vscode-textCodeBlock-background);
-            padding: 2px 4px;
-            border-radius: 3px;
-            font-family: var(--vscode-editor-font-family);
-        }
+      .info-message code {
+        background-color: var(--vscode-textCodeBlock-background);
+        padding: 2px 4px;
+        border-radius: 3px;
+        font-family: var(--vscode-editor-font-family);
+      }
 
-        /* Overlay for loading / errors */
-        .overlay {
-            position: absolute;
-            inset: 0;
-            background: var(--vscode-editor-background);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-            box-sizing: border-box;
+      /* Overlay for loading / errors */
+      .overlay {
+        position: absolute;
+        inset: 0;
+        background: var(--vscode-editor-background);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        box-sizing: border-box;
+      }
+      .overlay.visible {
+        display: flex;
+      }
+      .overlay-card {
+        max-width: 680px;
+        width: 100%;
+        border: 1px solid var(--vscode-panel-border);
+        background: var(--vscode-editorWidget-background);
+        color: var(--vscode-editorWidget-foreground);
+        border-radius: 6px;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+        padding: 16px;
+      }
+      .overlay-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        margin: 0 0 8px 0;
+      }
+      .overlay-body {
+        font-size: 13px;
+        line-height: 1.5;
+      }
+      .overlay-actions {
+        margin-top: 12px;
+        display: flex;
+        gap: 8px;
+      }
+      .spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid var(--vscode-descriptionForeground);
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
         }
-        .overlay.visible { display: flex; }
-        .overlay-card {
-            max-width: 680px;
-            width: 100%;
-            border: 1px solid var(--vscode-panel-border);
-            background: var(--vscode-editorWidget-background);
-            color: var(--vscode-editorWidget-foreground);
-            border-radius: 6px;
-            box-shadow: 0 4px 18px rgba(0,0,0,0.25);
-            padding: 16px;
-        }
-        .overlay-title { display:flex; align-items:center; gap:8px; font-weight:600; margin:0 0 8px 0; }
-        .overlay-body { font-size: 13px; line-height: 1.5; }
-        .overlay-actions { margin-top: 12px; display:flex; gap: 8px; }
-        .spinner { width:16px; height:16px; border:2px solid var(--vscode-descriptionForeground); border-top-color: transparent; border-radius:50%; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <div class="header">
-            <div class="left">
-                <label for="urlInput" class="label">MCP Vibe Inspector URL</label>
-                <input type="text" id="urlInput" class="url-input" value="{{INSPECTOR_URL}}" placeholder="http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=…" aria-describedby="urlError">
-                <span id="urlError" class="error-text" aria-live="polite"></span>
-            </div>
-            <div class="right">
-                <button id="reloadBtn" class="btn" title="Reload (Enter)" aria-label="Reload">
-                    <span class="icon" aria-hidden="true">
-                        <svg viewBox="0 0 16 16" width="14" height="14" fill="none"><path d="M8 3a5 5 0 1 1-4.546 2.916" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M2 3.5h3.5V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </span>
-                    <span class="label">Reload</span>
-                </button>
-                <button id="collapseBtn" class="btn" title="Collapse" aria-label="Collapse">
-                    <span class="icon" aria-hidden="true">
-                        <svg viewBox="0 0 16 16" width="14" height="14" fill="none"><path id="collapseIcon" d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </span>
-                    <span id="collapseLabel" class="label">Collapse</span>
-                </button>
-            </div>
+      <div class="header">
+        <div class="left">
+          <label for="urlInput" class="label">MCP Vibe Inspector URL</label>
+          <input
+            type="text"
+            id="urlInput"
+            class="url-input"
+            value="{{INSPECTOR_URL}}"
+            placeholder="http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=…"
+            aria-describedby="urlError"
+          />
+          <span id="urlError" class="error-text" aria-live="polite"></span>
         </div>
-        
-    <div style="padding:8px; display:flex; gap:8px; align-items:center;"></div>
-        <div id="content">
-            <div id="overlay" class="overlay" aria-live="polite" aria-atomic="true">
-                <div class="overlay-card">
-                    <div class="overlay-title"><span class="spinner" aria-hidden="true"></span> <span id="overlayTitle">Loading inspector…</span></div>
-                    <div class="overlay-body" id="overlayBody">Attempting to load the MCP Vibe Inspector at the provided URL. If this takes too long, verify the URL and that the inspector is running.</div>
-                    <div class="overlay-actions">
-                        <button id="retryBtn" class="btn" title="Retry"><span class="icon" aria-hidden="true"><svg viewBox="0 0 16 16" width="14" height="14" fill="none"><path d="M8 3a5 5 0 1 1-4.546 2.916" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M2 3.5h3.5V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="label">Retry</span></button>
-                        <button id="openDocsBtn" class="btn" title="Open Inspector Docs"><span class="icon" aria-hidden="true"><svg viewBox="0 0 16 16" width="14" height="14" fill="none"><path d="M3 3h10v10H3z" stroke="currentColor"/><path d="M5 6h6M5 8h6M5 10h4" stroke="currentColor"/></svg></span><span class="label">Docs</span></button>
-                    </div>
-                </div>
-            </div>
-            <div class="info-message">
-                <h3>Welcome to MCP Vibe Inspector</h3>
-                <p>This panel displays the MCP (Model Context Protocol) Vibe Inspector interface for debugging your local MCP servers.</p>
-                <p><strong>To get started:</strong></p>
-                <ol>
-                    <li>Run your MCP server locally</li>
-                    <li>Start the MCP inspector with: <code>npx @modelcontextprotocol/inspector</code></li>
-                    <li>The inspector typically runs on <code data-code="http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=">http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=</code></li>
-                    <li>Update the URL above if your inspector runs on a different port</li>
-                    <li>Click "Reload" to load the inspector interface</li>
-                </ol>
-                <p>The inspector allows you to test and debug your MCP server by examining available tools, resources, and prompts.</p>
-            </div>
+        <div class="right">
+          <button
+            id="reloadBtn"
+            class="btn"
+            title="Reload (Enter)"
+            aria-label="Reload"
+          >
+            <span class="icon" aria-hidden="true">
+              <svg viewBox="0 0 16 16" width="14" height="14" fill="none">
+                <path
+                  d="M8 3a5 5 0 1 1-4.546 2.916"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M2 3.5h3.5V7"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </span>
+            <span class="label">Reload</span>
+          </button>
+          <button
+            id="openBrowserBtn"
+            class="btn"
+            title="Open in Browser"
+            aria-label="Open in Browser"
+          >
+            <span class="icon" aria-hidden="true">
+              <svg viewBox="0 0 16 16" width="14" height="14" fill="none">
+                <path d="M2.5 2.5h11v11h-11z" stroke="currentColor" />
+                <path
+                  d="M5.5 5.5h5M5.5 8h5M5.5 10.5h3.5"
+                  stroke="currentColor"
+                />
+              </svg>
+            </span>
+            <span class="label">Open in Browser</span>
+          </button>
+          <button
+            id="collapseBtn"
+            class="btn"
+            title="Collapse"
+            aria-label="Collapse"
+          >
+            <span class="icon" aria-hidden="true">
+              <svg viewBox="0 0 16 16" width="14" height="14" fill="none">
+                <path
+                  id="collapseIcon"
+                  d="M4 6l4 4 4-4"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </span>
+            <span id="collapseLabel" class="label">Collapse</span>
+          </button>
         </div>
+      </div>
+
+      <div
+        style="padding: 8px; display: flex; gap: 8px; align-items: center"
+      ></div>
+      <div id="content">
+        <div id="overlay" class="overlay" aria-live="polite" aria-atomic="true">
+          <div class="overlay-card">
+            <div class="overlay-title">
+              <span class="spinner" aria-hidden="true"></span>
+              <span id="overlayTitle">Loading inspector…</span>
+            </div>
+            <div class="overlay-body" id="overlayBody">
+              Attempting to load the MCP Vibe Inspector at the provided URL. If
+              this takes too long, verify the URL and that the inspector is
+              running.
+            </div>
+            <div class="overlay-actions">
+              <button id="retryBtn" class="btn" title="Retry">
+                <span class="icon" aria-hidden="true"
+                  ><svg viewBox="0 0 16 16" width="14" height="14" fill="none">
+                    <path
+                      d="M8 3a5 5 0 1 1-4.546 2.916"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                    />
+                    <path
+                      d="M2 3.5h3.5V7"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    /></svg></span
+                ><span class="label">Retry</span>
+              </button>
+              <button id="cancelBtn" class="btn" title="Cancel loading">
+                <span class="icon" aria-hidden="true">
+                  <svg viewBox="0 0 16 16" width="14" height="14" fill="none">
+                    <circle cx="8" cy="8" r="6" stroke="currentColor" />
+                    <path d="M5.5 5.5l5 5m0-5l-5 5" stroke="currentColor" />
+                  </svg>
+                </span>
+                <span class="label">Cancel</span>
+              </button>
+              <button id="openDocsBtn" class="btn" title="Open Inspector Docs">
+                <span class="icon" aria-hidden="true"
+                  ><svg viewBox="0 0 16 16" width="14" height="14" fill="none">
+                    <path d="M3 3h10v10H3z" stroke="currentColor" />
+                    <path
+                      d="M5 6h6M5 8h6M5 10h4"
+                      stroke="currentColor"
+                    /></svg></span
+                ><span class="label">Docs</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="info-message">
+          <h3>Welcome to MCP Vibe Inspector</h3>
+          <p>
+            This panel displays the MCP (Model Context Protocol) Vibe Inspector
+            interface for debugging your local MCP servers.
+          </p>
+          <p><strong>To get started:</strong></p>
+          <ol>
+            <li>Run your MCP server locally</li>
+            <li>
+              Start the MCP inspector with:
+              <code>npx @modelcontextprotocol/inspector</code>
+            </li>
+            <li>
+              The inspector typically runs on
+              <code data-code="http://localhost:6274/?MCP_PROXY_AUTH_TOKEN="
+                >http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=</code
+              >
+            </li>
+            <li>
+              Update the URL above if your inspector runs on a different port
+            </li>
+            <li>Click "Reload" to load the inspector interface</li>
+          </ol>
+          <p>
+            The inspector allows you to test and debug your MCP server by
+            examining available tools, resources, and prompts.
+          </p>
+        </div>
+      </div>
     </div>
 
     <script>
-        const vscode = acquireVsCodeApi();
-        const urlInput = document.getElementById('urlInput');
-        const urlError = document.getElementById('urlError');
-        const reloadBtn = document.getElementById('reloadBtn');
-        const collapseBtn = document.getElementById('collapseBtn');
-        const collapseLabel = document.getElementById('collapseLabel');
-        const overlay = document.getElementById('overlay');
-        const overlayTitle = document.getElementById('overlayTitle');
-        const overlayBody = document.getElementById('overlayBody');
-        const retryBtn = document.getElementById('retryBtn');
-        const openDocsBtn = document.getElementById('openDocsBtn');
+      const vscode = acquireVsCodeApi();
+      const urlInput = document.getElementById('urlInput');
+      const urlError = document.getElementById('urlError');
+      const reloadBtn = document.getElementById('reloadBtn');
+      const collapseBtn = document.getElementById('collapseBtn');
+      const collapseLabel = document.getElementById('collapseLabel');
+      const overlay = document.getElementById('overlay');
+      const overlayTitle = document.getElementById('overlayTitle');
+      const overlayBody = document.getElementById('overlayBody');
+      const retryBtn = document.getElementById('retryBtn');
+      const cancelBtn = document.getElementById('cancelBtn');
+      const openDocsBtn = document.getElementById('openDocsBtn');
 
-        let currentIframe = null;
-        let loadTimer = null;
-        let collapsed = false;
+      let currentIframe = null;
+      let loadTimer = null;
+      let collapsed = false;
+      let currentLoadId = 0; // increments per load to invalidate stale events
+      let restoreApplied = false; // ensure restoreState or initial restore runs once
 
-        function validateUrl(v) {
-            if (!v) return { ok: false, message: 'Please paste the inspector URL.' };
-            try {
-                const u = new URL(v);
-                const ok = (u.protocol === 'http:' || u.protocol === 'https:') && u.searchParams.has('MCP_PROXY_AUTH_TOKEN');
-                return ok ? { ok: true } : { ok: false, message: 'Enter http(s) URL that includes MCP_PROXY_AUTH_TOKEN.' };
-            } catch (e) { return { ok: false, message: 'Invalid URL format.' }; }
-        }
-
-        function showInlineError(msg) {
-            urlError.textContent = msg || '';
-            if (msg) {
-                urlInput.classList.add('invalid');
-                urlInput.setAttribute('aria-invalid', 'true');
-            } else {
-                urlInput.classList.remove('invalid');
-                urlInput.removeAttribute('aria-invalid');
-            }
-        }
-
-        function showOverlay({ title = 'Loading inspector…', body = 'Attempting to load the MCP Vibe Inspector…', showSpinner = true, showRetry = true } = {}) {
-            overlayTitle.textContent = title;
-            overlayBody.textContent = body;
-            const spinner = overlay.querySelector('.spinner');
-            if (spinner) spinner.style.display = showSpinner ? 'inline-block' : 'none';
-            retryBtn.style.display = showRetry ? 'inline-flex' : 'none';
-            overlay.classList.add('visible');
-        }
-
-        function hideOverlay() {
-            overlay.classList.remove('visible');
-        }
-
-        function startLoadWatchdog(timeoutMs = 10000) {
-            if (loadTimer) clearTimeout(loadTimer);
-            loadTimer = setTimeout(() => {
-                showOverlay({
-                    title: 'Still loading…',
-                    body: 'This is taking longer than expected. The Inspector might be unreachable or blocked. Check the URL and network, then retry.',
-                    showSpinner: false,
-                    showRetry: true,
-                });
-            }, timeoutMs);
-        }
-        function cancelLoadWatchdog() { if (loadTimer) { clearTimeout(loadTimer); loadTimer = null; } }
-
-        function showMessage(text, type = 'info') {
-            const header = document.querySelector('.header');
-            let el = document.getElementById('inlineMessage');
-            if (!el) {
-                el = document.createElement('div');
-                el.id = 'inlineMessage';
-                el.style.marginLeft = '12px';
-                el.style.padding = '6px 8px';
-                el.style.borderRadius = '4px';
-                el.style.fontSize = '12px';
-                header.appendChild(el);
-            }
-            el.textContent = text;
-            el.style.color = type === 'error' ? 'var(--vscode-errorForeground)' : 'var(--vscode-foreground)';
-            if (type === 'info') {
-                setTimeout(() => { try { el.style.opacity = '0'; } catch (e) {} }, 1800);
-                setTimeout(() => { try { el.remove(); } catch (e) {} }, 2400);
-            }
-        }
-
-        function mountIframe(url) {
-            const content = document.getElementById('content');
-            // remove all children except overlay
-            Array.from(content.children).forEach(ch => { if (ch.id !== 'overlay') ch.remove(); });
-            currentIframe = document.createElement('iframe');
-            currentIframe.className = 'inspector-frame';
-            currentIframe.setAttribute('allow', 'clipboard-read; clipboard-write;');
-            currentIframe.setAttribute('tabindex', '0');
-            content.appendChild(currentIframe);
-
-            showOverlay({ title: 'Loading inspector…', body: 'Attempting to load the MCP Vibe Inspector at the provided URL.', showSpinner: true, showRetry: false });
-            startLoadWatchdog();
-
-            currentIframe.addEventListener('load', () => {
-                cancelLoadWatchdog();
-                hideOverlay();
-                showInlineError('');
-                try { currentIframe.focus(); } catch {}
-                showMessage('Loaded', 'info');
-            });
-            currentIframe.addEventListener('error', () => {
-                cancelLoadWatchdog();
-                showInlineError('Failed to load the inspector. Please check the URL and try again.');
-                showOverlay({ title: 'Failed to load', body: 'The inspector could not be loaded. Verify the URL and that the server is reachable, then retry.', showSpinner: false, showRetry: true });
-            });
-
-            currentIframe.src = url;
-        }
-
-        function reloadInspector() {
-            const url = urlInput.value.trim();
-            const res = validateUrl(url);
-            if (!res.ok) { showInlineError(res.message); return; }
-            showInlineError('');
-            vscode.postMessage({ command: 'updateUrl', url });
-            mountIframe(url);
-            try {
-                const state = { lastUrl: url, collapsed };
-                vscode.setState(state);
-                vscode.postMessage({ command: 'saveState', state });
-            } catch {}
-        }
-
-        function setCollapsed(next) {
-            collapsed = next;
-            const content = document.getElementById('content');
-            content.style.display = collapsed ? 'none' : 'flex';
-            if (collapsed) { hideOverlay(); }
-            if (collapseLabel) collapseLabel.textContent = collapsed ? 'Expand' : 'Collapse';
-            collapseBtn.title = collapsed ? 'Expand' : 'Collapse';
-            const icon = collapseBtn.querySelector('svg');
-            if (icon) {
-                if (collapsed) icon.setAttribute('transform', 'rotate(180)');
-                else icon.removeAttribute('transform');
-            }
-            try {
-                const state = { lastUrl: urlInput.value, collapsed };
-                vscode.setState(state);
-                vscode.postMessage({ command: 'saveState', state });
-            } catch {}
-        }
-
-        // Wire UI
-        reloadBtn.addEventListener('click', reloadInspector);
-        urlInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') reloadInspector(); });
-        urlInput.addEventListener('input', () => showInlineError(''));
-        document.getElementById('urlInput').addEventListener('change', (e) => {
-            vscode.postMessage({ command: 'updateUrl', url: e.target.value });
-        });
-        collapseBtn.addEventListener('click', () => setCollapsed(!collapsed));
-        retryBtn.addEventListener('click', reloadInspector);
-        openDocsBtn.addEventListener('click', () => {
-            vscode.postMessage({ type: 'openExternal', url: 'https://github.com/modelcontextprotocol/inspector' });
-        });
-
-        // Copy buttons inside info
-        (function attachCopyButtons(){
-            const codes = document.querySelectorAll('code[data-code]');
-            codes.forEach(c => {
-                const btn = document.createElement('button');
-                btn.style.marginLeft = '6px';
-                btn.style.width = '22px';
-                btn.style.height = '22px';
-                btn.style.display = 'inline-flex';
-                btn.style.alignItems = 'center';
-                btn.style.justifyContent = 'center';
-                btn.style.fontSize = '14px';
-                btn.style.borderRadius = '4px';
-                btn.style.border = 'none';
-                btn.style.background = 'transparent';
-                btn.style.color = 'var(--vscode-descriptionForeground)';
-                btn.style.cursor = 'pointer';
-                btn.style.opacity = '0.6';
-                btn.title = 'Copy to clipboard';
-                btn.setAttribute('aria-label', 'Copy to clipboard');
-                btn.innerHTML = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true" focusable="false"><path d="M6 2h7a1 1 0 0 1 1 1v7h-2V4H6V2z" fill="currentColor" opacity=".45"/><rect x="2" y="4" width="9" height="9" rx="1.5" fill="currentColor"/></svg>';
-                btn.onmouseenter = () => { btn.style.opacity = '1'; btn.style.background = 'var(--vscode-toolbar-hoverBackground)'; btn.style.color = 'var(--vscode-foreground)'; };
-                btn.onmouseleave = () => { btn.style.opacity = '0.6'; btn.style.background = 'transparent'; btn.style.color = 'var(--vscode-descriptionForeground)'; };
-                const text = c.getAttribute('data-code') || c.textContent || '';
-                btn.addEventListener('click', () => { navigator.clipboard.writeText(text).catch(() => showInlineError('Copy failed')); });
-                c.parentNode.insertBefore(btn, c.nextSibling);
-            });
-        })();
-
-        // Restore state and maybe auto-load
+      function validateUrl(v) {
+        if (!v)
+          return { ok: false, message: 'Please paste the inspector URL.' };
         try {
-            const prev = vscode.getState && vscode.getState();
-            if (prev) {
-                if (prev.lastUrl) urlInput.value = prev.lastUrl;
-                if (typeof prev.collapsed === 'boolean') setCollapsed(prev.collapsed); else setCollapsed(false);
-                if (prev.lastUrl) {
-                    const res = validateUrl(prev.lastUrl);
-                    if (res.ok) mountIframe(prev.lastUrl);
-                }
-            }
-        } catch {}
+          const u = new URL(v);
+          const ok =
+            (u.protocol === 'http:' || u.protocol === 'https:') &&
+            u.searchParams.has('MCP_PROXY_AUTH_TOKEN');
+          return ok
+            ? { ok: true }
+            : {
+                ok: false,
+                message:
+                  'Enter http(s) URL that includes MCP_PROXY_AUTH_TOKEN.',
+              };
+        } catch (e) {
+          return { ok: false, message: 'Invalid URL format.' };
+        }
+      }
 
-        // Listen for messages from extension
-        window.addEventListener('message', (event) => {
-            const msg = event.data || {};
-            if (msg.command === 'urlError') {
-                showInlineError(msg.text || 'Invalid URL');
-            }
-            if (msg.command === 'restoreState') {
-                try {
-                    const s = msg.state || {};
-                    if (typeof s.collapsed === 'boolean') setCollapsed(s.collapsed);
-                    if (s.lastUrl) {
-                        urlInput.value = s.lastUrl;
-                        const res = validateUrl(s.lastUrl);
-                        if (res.ok && !collapsed) mountIframe(s.lastUrl);
-                    }
-                } catch {}
-            }
-            if (msg.command === 'forceCollapse') {
-                setCollapsed(true);
-            }
+      function showInlineError(msg) {
+        urlError.textContent = msg || '';
+        if (msg) {
+          urlInput.classList.add('invalid');
+          urlInput.setAttribute('aria-invalid', 'true');
+        } else {
+          urlInput.classList.remove('invalid');
+          urlInput.removeAttribute('aria-invalid');
+        }
+      }
+
+      function showOverlay({
+        title = 'Loading inspector…',
+        body = 'Attempting to load the MCP Vibe Inspector…',
+        showSpinner = true,
+        showRetry = true,
+      } = {}) {
+        overlayTitle.textContent = title;
+        overlayBody.textContent = body;
+        const spinner = overlay.querySelector('.spinner');
+        if (spinner)
+          spinner.style.display = showSpinner ? 'inline-block' : 'none';
+        retryBtn.style.display = showRetry ? 'inline-flex' : 'none';
+        overlay.classList.add('visible');
+      }
+
+      function hideOverlay() {
+        overlay.classList.remove('visible');
+      }
+
+      function startLoadWatchdog(timeoutMs = 10000) {
+        if (loadTimer) clearTimeout(loadTimer);
+        loadTimer = setTimeout(() => {
+          showOverlay({
+            title: 'Still loading…',
+            body: 'This is taking longer than expected. The Inspector might be unreachable or blocked. Check the URL and network, then retry.',
+            showSpinner: false,
+            showRetry: true,
+          });
+        }, timeoutMs);
+      }
+      function cancelLoadWatchdog() {
+        if (loadTimer) {
+          clearTimeout(loadTimer);
+          loadTimer = null;
+        }
+      }
+
+      function showMessage(_text, _type = 'info') {
+        // Inline messages disabled (no-op)
+      }
+
+      function mountIframe(url) {
+        const loadId = ++currentLoadId;
+        const content = document.getElementById('content');
+        // remove all children except overlay
+        Array.from(content.children).forEach((ch) => {
+          if (ch.id !== 'overlay') ch.remove();
         });
+        currentIframe = document.createElement('iframe');
+        currentIframe.className = 'inspector-frame';
+        currentIframe.setAttribute('allow', 'clipboard-read; clipboard-write;');
+        currentIframe.setAttribute('tabindex', '0');
+        content.appendChild(currentIframe);
+
+        showOverlay({
+          title: 'Loading inspector…',
+          body: 'Attempting to load the MCP Vibe Inspector at the provided URL.',
+          showSpinner: true,
+          showRetry: false,
+        });
+        startLoadWatchdog();
+
+        currentIframe.addEventListener('load', () => {
+          if (loadId !== currentLoadId) return; // stale event ignored
+          cancelLoadWatchdog();
+          hideOverlay();
+          showInlineError('');
+          try {
+            currentIframe.focus();
+          } catch {}
+        });
+        currentIframe.addEventListener('error', () => {
+          if (loadId !== currentLoadId) return; // stale event ignored
+          cancelLoadWatchdog();
+          showInlineError(
+            'Failed to load the inspector. Please check the URL and try again.'
+          );
+          showOverlay({
+            title: 'Failed to load',
+            body: 'The inspector could not be loaded. Verify the URL and that the server is reachable, then retry.',
+            showSpinner: false,
+            showRetry: true,
+          });
+        });
+
+        currentIframe.src = url;
+      }
+
+      function cancelLoading() {
+        // Invalidate any in-flight listeners
+        currentLoadId++;
+        cancelLoadWatchdog();
+        if (currentIframe) {
+          try {
+            currentIframe.src = 'about:blank';
+          } catch {}
+          try {
+            currentIframe.remove();
+          } catch {}
+          currentIframe = null;
+        }
+        hideOverlay();
+        // Optionally restore collapsed=false display if needed
+        const content = document.getElementById('content');
+        content.style.display = collapsed ? 'none' : 'flex';
+      }
+
+      function reloadInspector() {
+        const url = urlInput.value.trim();
+        const res = validateUrl(url);
+        if (!res.ok) {
+          showInlineError(res.message);
+          // Clear any existing content and show an explicit error overlay
+          try {
+            cancelLoading();
+          } catch {}
+          showOverlay({
+            title: 'Invalid URL',
+            body: res.message || 'Please enter a valid inspector URL',
+            showSpinner: false,
+            showRetry: false,
+          });
+          return;
+        }
+        showInlineError('');
+        // Abort any ongoing load and clear current iframe/overlay before reloading
+        try {
+          cancelLoading();
+        } catch {}
+        vscode.postMessage({ command: 'updateUrl', url });
+        mountIframe(url);
+        try {
+          const state = { lastUrl: url, collapsed };
+          vscode.setState(state);
+          vscode.postMessage({ command: 'saveState', state });
+        } catch {}
+      }
+
+      function setCollapsed(next) {
+        collapsed = next;
+        const content = document.getElementById('content');
+        content.style.display = collapsed ? 'none' : 'flex';
+        if (collapsed) {
+          hideOverlay();
+        }
+        if (collapseLabel)
+          collapseLabel.textContent = collapsed ? 'Expand' : 'Collapse';
+        collapseBtn.title = collapsed ? 'Expand' : 'Collapse';
+        const icon = collapseBtn.querySelector('svg');
+        if (icon) {
+          if (collapsed) icon.setAttribute('transform', 'rotate(180)');
+          else icon.removeAttribute('transform');
+        }
+        try {
+          const state = { lastUrl: urlInput.value, collapsed };
+          vscode.setState(state);
+          vscode.postMessage({ command: 'saveState', state });
+        } catch {}
+      }
+
+      // Wire UI
+      reloadBtn.addEventListener('click', reloadInspector);
+      urlInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') reloadInspector();
+      });
+      urlInput.addEventListener('input', () => showInlineError(''));
+      document.getElementById('urlInput').addEventListener('change', (e) => {
+        vscode.postMessage({ command: 'updateUrl', url: e.target.value });
+      });
+      collapseBtn.addEventListener('click', () => setCollapsed(!collapsed));
+      retryBtn.addEventListener('click', reloadInspector);
+      cancelBtn.addEventListener('click', cancelLoading);
+      openDocsBtn.addEventListener('click', () => {
+        vscode.postMessage({
+          type: 'openExternal',
+          url: 'https://github.com/modelcontextprotocol/inspector',
+        });
+      });
+
+      // Open in external browser
+      const openBrowserBtn = document.getElementById('openBrowserBtn');
+      if (openBrowserBtn) {
+        openBrowserBtn.addEventListener('click', () => {
+          const url = urlInput.value.trim();
+          const res = validateUrl(url);
+          if (!res.ok) {
+            showInlineError(res.message);
+            return;
+          }
+          vscode.postMessage({ command: 'openExternal', url });
+        });
+      }
+
+      // Paste button removed
+
+      // Copy buttons inside info
+      (function attachCopyButtons() {
+        const codes = document.querySelectorAll('code[data-code]');
+        codes.forEach((c) => {
+          const btn = document.createElement('button');
+          btn.style.marginLeft = '6px';
+          btn.style.width = '22px';
+          btn.style.height = '22px';
+          btn.style.display = 'inline-flex';
+          btn.style.alignItems = 'center';
+          btn.style.justifyContent = 'center';
+          btn.style.fontSize = '14px';
+          btn.style.borderRadius = '4px';
+          btn.style.border = 'none';
+          btn.style.background = 'transparent';
+          btn.style.color = 'var(--vscode-descriptionForeground)';
+          btn.style.cursor = 'pointer';
+          btn.style.opacity = '0.6';
+          btn.title = 'Copy to clipboard';
+          btn.setAttribute('aria-label', 'Copy to clipboard');
+          btn.innerHTML =
+            '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true" focusable="false"><path d="M6 2h7a1 1 0 0 1 1 1v7h-2V4H6V2z" fill="currentColor" opacity=".45"/><rect x="2" y="4" width="9" height="9" rx="1.5" fill="currentColor"/></svg>';
+          btn.onmouseenter = () => {
+            btn.style.opacity = '1';
+            btn.style.background = 'var(--vscode-toolbar-hoverBackground)';
+            btn.style.color = 'var(--vscode-foreground)';
+          };
+          btn.onmouseleave = () => {
+            btn.style.opacity = '0.6';
+            btn.style.background = 'transparent';
+            btn.style.color = 'var(--vscode-descriptionForeground)';
+          };
+          const text = c.getAttribute('data-code') || c.textContent || '';
+          btn.addEventListener('click', () => {
+            navigator.clipboard
+              .writeText(text)
+              .catch(() => showInlineError('Copy failed'));
+          });
+          c.parentNode.insertBefore(btn, c.nextSibling);
+        });
+      })();
+
+      // Restore state and maybe auto-load
+      try {
+        const prev = vscode.getState && vscode.getState();
+        if (prev && !restoreApplied) {
+          if (prev.lastUrl) urlInput.value = prev.lastUrl;
+          if (typeof prev.collapsed === 'boolean') setCollapsed(prev.collapsed);
+          else setCollapsed(false);
+          if (prev.lastUrl) {
+            const res = validateUrl(prev.lastUrl);
+            if (res.ok) mountIframe(prev.lastUrl);
+          }
+          restoreApplied = true;
+        }
+      } catch {}
+
+      // Listen for messages from extension
+      window.addEventListener('message', (event) => {
+        const msg = event.data || {};
+        if (msg.command === 'urlError') {
+          showInlineError(msg.text || 'Invalid URL');
+        }
+        if (msg.command === 'restoreState' && !restoreApplied) {
+          try {
+            const s = msg.state || {};
+            if (typeof s.collapsed === 'boolean') setCollapsed(s.collapsed);
+            if (s.lastUrl) {
+              urlInput.value = s.lastUrl;
+              const res = validateUrl(s.lastUrl);
+              if (res.ok && !collapsed) mountIframe(s.lastUrl);
+            }
+            restoreApplied = true;
+          } catch {}
+        }
+        if (msg.command === 'forceCollapse') {
+          setCollapsed(true);
+        }
+      });
     </script>
-</body>
+  </body>
 </html>
