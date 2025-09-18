@@ -1,7 +1,18 @@
-// Listen for messages from extension to update inspector URL
-window.addEventListener('message', (event) => { const msg = event.data; if (msg
-&& msg.command === 'setInspectorUrl' && msg.url) { urlInput.value = msg.url;
-showMessage('Inspector URL auto-filled!', 'info'); } });
+<div class="tip" style="margin-bottom: 12px">
+  <strong
+    >If the <em>Start Inspector (one click)</em> button does not work,</strong
+  >
+  run the following command manually in your terminal, then continue with the
+  steps below:
+  <div
+    class="code"
+    data-code="npx @modelcontextprotocol/inspector"
+    style="display: inline-block; margin: 6px 0 0 0"
+  >
+    <code>npx @modelcontextprotocol/inspector</code>
+  </div>
+</div>
+<!-- MCP VIBE INSPECTOR SIDEBAR -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -155,8 +166,11 @@ showMessage('Inspector URL auto-filled!', 'info'); } });
           <div>MCP Vibe Inspector</div>
         </div>
         <p class="lead">
-          Quickly open the MCP Vibe Inspector (use the tokened URL from your
-          terminal).
+          Quickly open the MCP Vibe Inspector. <br />
+          <strong
+            >After starting the Inspector, copy the URL from your terminal
+            output and paste it below.</strong
+          >
         </p>
       </div>
       <div class="section">
@@ -174,10 +188,19 @@ showMessage('Inspector URL auto-filled!', 'info'); } });
         <ol class="steps">
           <li>
             Click <strong>Start Inspector</strong> above to launch the MCP
-            Inspector server.
+            Inspector server in your terminal.
           </li>
-          <li>The Inspector URL will be auto-filled below when ready.</li>
-          <li>Click <strong>Open Inspector</strong> to launch the panel.</li>
+          <li>
+            <strong>Copy the Inspector URL</strong> from your terminal output.
+            Example:
+            <div class="code" style="display: block; margin: 6px 0 0 0">
+              <code>http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=xyz</code>
+            </div>
+          </li>
+          <li>
+            <strong>Paste the Inspector URL</strong> below, then click
+            <strong>Open Inspector</strong> to launch the panel.
+          </li>
         </ol>
         <script>
           // Add Start Inspector button logic with diagnostic logging
@@ -213,8 +236,9 @@ showMessage('Inspector URL auto-filled!', 'info'); } });
           </button>
         </div>
         <div class="tip">
-          Tip: URL looks like
-          <code>http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=…</code>
+          <strong>Tip:</strong> The Inspector URL will be printed in your
+          terminal after starting the Inspector. It looks like:
+          <code>http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=xyz</code>
         </div>
       </div>
       <div class="section">
