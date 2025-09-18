@@ -1,0 +1,18 @@
+# CODEOWNERS file for vscode-mcp-debugger
+# This file defines who must approve changes to specific files/directories
+
+# Global rule: All changes to the main branch require approval from abcSTARK
+* @abcSTARK
+
+# Critical files that always require approval
+package.json @abcSTARK
+package-lock.json @abcSTARK
+tsconfig.json @abcSTARK
+.github/ @abcSTARK
+.gitignore @abcSTARK
+
+# Documentation that requires approval
+README.md @abcSTARK
+CONTRIBUTING.md @abcSTARK
+CHANGELOG.md @abcSTARK
+SECURITY.md @abcSTARK

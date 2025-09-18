@@ -14,6 +14,9 @@ Development workflow
 - Keep PRs small and focused; include before/after notes and screenshots for UI changes
 - Run npm run compile and npm run lint before pushing
 - Add/update tests when changing public behavior
+- All PRs require approval from a code owner (@abcSTARK) before merging
+- CI tests must pass before merging (automated via GitHub Actions)
+- Direct pushes to main branch are not allowed
 
 Coding standards
 

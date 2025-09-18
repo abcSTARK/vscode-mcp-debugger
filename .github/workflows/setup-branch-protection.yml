@@ -1,0 +1,38 @@
+name: Setup Branch Protection
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/setup-branch-protection.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  setup-protection:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Branch Protection
+      run: |
+        echo "⚠️  Branch protection rules need to be configured manually in GitHub repository settings."
+        echo "📋 Please follow the instructions in .github/BRANCH_PROTECTION.md"
+        echo "🔧 Required settings:"
+        echo "   - Require PR reviews (1 approval from code owners)"
+        echo "   - Require status checks: CI tests must pass"
+        echo "   - Restrict direct pushes to main branch"
+        echo "   - Disable force pushes and deletions"
+        echo ""
+        echo "🔗 Configure at: https://github.com/${{ github.repository }}/settings/branches"
+
+    - name: Comment on Protection Setup
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        echo "Branch protection workflow completed."
+        echo "Manual configuration required in repository settings."
