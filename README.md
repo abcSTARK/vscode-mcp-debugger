@@ -102,9 +102,22 @@ npm run lint
 npm test
 ```
 
+Or use the development environment check script:
+
+```bash
+./scripts/check-dev-env.sh
+```
+
 ## 🤝 Contributing
 
 Issues and PRs are welcome. See `CONTRIBUTING.md` and `CODE_OF_CONDUCT.md`.
+
+This repository uses branch protection rules requiring:
+- Code owner approval for all changes
+- Passing CI tests (lint, compile, package)
+- Pull request workflow (no direct pushes to main)
+
+For more details, see [`.github/BRANCH_PROTECTION_SETUP.md`](.github/BRANCH_PROTECTION_SETUP.md).
 
 ## 🔒 Security
 
