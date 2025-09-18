@@ -3,6 +3,11 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { McpInspectorSidebarProvider } from './mcpInspectorSidebarProvider';
 
+// --- MCPInspectorPanel class ---
+
+// Remove duplicate class definition and keep only one MCPInspectorPanel class
+// Make constructor public and isValidUrl static method public
+
 /**
  * Activate the extension.
  */
@@ -35,7 +40,7 @@ export function activate(context: vscode.ExtensionContext) {
   // Command to open the inspector in a standalone webview panel
   const openCmd = vscode.commands.registerCommand(
     'mcp-debugger.openInspector',
-    () => MCPInspectorPanel.createOrShow(context.extensionUri, context)
+    () => MCPInspectorPanel.createNew(context.extensionUri, context)
   );
 
   // Command to reveal the activity-bar view
@@ -48,8 +53,8 @@ export function activate(context: vscode.ExtensionContext) {
           'workbench.view.extension.mcpDebugger'
         );
       } catch (err) {
-        // Fallback: show the panel instead
-        MCPInspectorPanel.createOrShow(context.extensionUri, context);
+        // Fallback: show a new panel instead
+        MCPInspectorPanel.createNew(context.extensionUri, context);
       }
     }
   );
@@ -86,14 +91,14 @@ export function deactivate() {
  * Manages the MCP Vibe Inspector webview panel.
  * Single-panel (singleton) implementation to keep things simple.
  */
+
 class MCPInspectorPanel {
-  public static currentPanel: MCPInspectorPanel | undefined;
   public static readonly viewType = 'mcpInspector';
 
   private readonly panel: vscode.WebviewPanel;
   private readonly extensionUri: vscode.Uri;
-  private disposables: vscode.Disposable[] = [];
   private context: vscode.ExtensionContext;
+  private disposables: vscode.Disposable[] = [];
 
   private constructor(
     panel: vscode.WebviewPanel,
@@ -129,7 +134,7 @@ class MCPInspectorPanel {
     );
   }
 
-  public static createOrShow(
+  public static createNew(
     extensionUri: vscode.Uri,
     context: vscode.ExtensionContext
   ) {
@@ -137,21 +142,13 @@ class MCPInspectorPanel {
       ? vscode.window.activeTextEditor.viewColumn
       : undefined;
 
-    if (MCPInspectorPanel.currentPanel) {
-      MCPInspectorPanel.currentPanel.panel.reveal(column);
-      return;
-    }
-
     const panel = vscode.window.createWebviewPanel(
       MCPInspectorPanel.viewType,
       'MCP Vibe Inspector',
       column || vscode.ViewColumn.One,
       {
         enableScripts: true,
-        // Preserve the webview state when it becomes hidden. This prevents the
-        // iframe/content from being destroyed when the user switches tabs.
         retainContextWhenHidden: true,
-        // Allow loading local resources from extension
         localResourceRoots: [
           vscode.Uri.joinPath(extensionUri, 'src'),
           vscode.Uri.joinPath(extensionUri, 'media'),
@@ -159,33 +156,19 @@ class MCPInspectorPanel {
       }
     );
 
-    MCPInspectorPanel.currentPanel = new MCPInspectorPanel(
-      panel,
-      extensionUri,
-      context
-    );
+    new MCPInspectorPanel(panel, extensionUri, context);
   }
 
-  /**
-   * Revive an existing webview panel (used by the serializer).
-   */
   public static revive(
     panel: vscode.WebviewPanel,
     extensionUri: vscode.Uri,
     context: vscode.ExtensionContext,
     state?: any
   ) {
-    MCPInspectorPanel.currentPanel = new MCPInspectorPanel(
-      panel,
-      extensionUri,
-      context
-    );
-
-    // If there is saved webview state (set via acquireVsCodeApi().setState),
-    // forward it to the restored webview so it can rehydrate UI (e.g. lastUrl).
+    const instance = new MCPInspectorPanel(panel, extensionUri, context);
     if (state) {
       try {
-        MCPInspectorPanel.currentPanel.panel.webview.postMessage({
+        panel.webview.postMessage({
           command: 'restoreState',
           state,
           restored: true,
@@ -195,14 +178,12 @@ class MCPInspectorPanel {
         // ignore
       }
     }
+    return instance;
   }
 
   public dispose() {
-    MCPInspectorPanel.currentPanel = undefined;
-
     // dispose panel
     this.panel.dispose();
-
     // dispose subscriptions
     while (this.disposables.length) {
       const d = this.disposables.pop();
