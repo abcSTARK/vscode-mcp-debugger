@@ -1,3 +1,20 @@
+
+# [1.1.0] - 2025-09-18
+
+### Added
+
+- New feature: Support for running multiple inspection sessions/tabs simultaneously. This allows users to inspect and debug multiple Model Context Protocol servers in parallel, each in its own tab.
+
+# [2.0.0] - 2025-09-18
+
+### Added
+
+- One-click Start Inspector from the sidebar. The extension now launches the Inspector in the integrated terminal using the same command as the manual workflow (`npx @modelcontextprotocol/inspector`). A fallback copyable command is shown in the sidebar if the terminal launch fails.
+
+### Changed
+
+- Bumped major version to 2.0.0 to reflect the integrated workflow change and UX improvements to the sidebar.
+
 # Change Log
 
 All notable changes to the "MCP Vibe Inspector" extension will be documented in this file.

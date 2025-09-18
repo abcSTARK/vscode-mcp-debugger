@@ -2,7 +2,7 @@
   "name": "mcp-debugger",
   "displayName": "MCP Vibe Inspector",
   "description": "Debug and inspect Model Context Protocol (MCP) servers right inside VS Code.",
-  "version": "1.0.3",
+  "version": "2.0.0",
   "publisher": "abcSTARK",
   "license": "MIT",
   "repository": {
@@ -110,6 +110,12 @@
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src",
     "test": "vscode-test"
+  },
+  "bundledDependencies": [
+    "@modelcontextprotocol/inspector"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/inspector": "^1.0.0"
   },
   "devDependencies": {
     "@types/vscode": "^1.104.0",

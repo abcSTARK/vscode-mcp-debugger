@@ -14,14 +14,24 @@ This extension embeds the MCP Vibe Inspector in a Webview Panel and provides a l
 - Copy-to-clipboard for inline code snippets (icon-only buttons)
 - Theme-aware, accessible UI using VS Code design tokens
 - Remembers your last URL and panel state
+- **NEW in 1.1.0:** Run multiple inspection sessions/tabs at once. Debug and inspect several MCP servers in parallel, each in its own tab for maximum productivity.
+- **NEW in 2.0.0:** One-click Start Inspector from the sidebar. The extension will run the Inspector in your integrated terminal (using the exact manual command) and provide a clear fallback copyable command if terminal launch fails.
 
 ## 🚀 Getting started
 
-1. Start your MCP Vibe Inspector locally:
+1. **Start the MCP Vibe Inspector with one click:**
 
-```bash
-npx @modelcontextprotocol/inspector
-```
+- Open the Command Palette (`Cmd+Shift+P` on macOS, `Ctrl+Shift+P` on Windows/Linux) or open the MCP Vibe Inspector sidebar from the Activity Bar.
+- Click the **Start Inspector** button in the sidebar. This runs the exact command used in manual workflows in an integrated terminal:
+
+  ```
+  npx @modelcontextprotocol/inspector
+  ```
+
+- Behavior:
+  - The Inspector is launched in your integrated terminal so you can see logs and any authentication tokens that appear in stdout.
+  - If the Start button fails to launch the Inspector (rare), use the fallback command above — a copy button is provided next to it in the sidebar for one-click copy.
+  - After Inspector starts, copy the Inspector URL from the terminal output (it contains the required MCP_PROXY_AUTH_TOKEN) and paste it into the sidebar input. Click Open Inspector to open the panel.
 
 ![MCP Vibe Inspector screenshot](media/screenshot-2.png)
 
