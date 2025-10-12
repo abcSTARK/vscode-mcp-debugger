@@ -1,3 +1,13 @@
+# [2.2.0] - 2025-10-12
+
+### Added
+
+- Proxy Session Token textbox and copy button in sidebar, matching style and functionality of Bearer Token and MCP URL fields. Makes it easy to copy the proxy session token for use in other tools or workflows.
+
+### Changed
+
+- Bumped minor version to 2.2.0 for new sidebar feature and release prep.
+
 # [2.1.1] - 2025-10-12
 
 ### Fixed
