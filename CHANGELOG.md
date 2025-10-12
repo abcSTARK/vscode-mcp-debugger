@@ -1,3 +1,13 @@
+# [2.1.0] - 2025-10-12
+
+### Added
+
+- Bearer Token textbox and copy icon in sidebar
+- MCP URL textbox and copy icon in sidebar
+
+### Changed
+
+- Bumped minor version to 2.1.0 to reflect new sidebar features
 
 # [1.1.0] - 2025-09-18
 
