@@ -1,3 +1,13 @@
+# [2.1.1] - 2025-10-12
+
+### Fixed
+
+- Inspector panel now automatically loads the MCP Inspector URL on first open, without requiring manual reload. This improves workflow and matches user expectations.
+
+### Changed
+
+- Bumped patch version to 2.1.1 for auto-load bugfix and release prep.
+
 # [2.1.0] - 2025-10-12
 
 ### Added

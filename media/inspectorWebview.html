@@ -684,6 +684,17 @@
         }
       } catch {}
 
+      // Auto-load on first run if URL is pre-filled and no state was restored
+      if (!restoreApplied) {
+        const initialUrl = urlInput.value.trim();
+        if (initialUrl) {
+          const res = validateUrl(initialUrl);
+          if (res.ok && !collapsed) {
+            mountIframe(initialUrl);
+          }
+        }
+      }
+
       // Listen for messages from extension
       window.addEventListener('message', (event) => {
         const msg = event.data || {};
