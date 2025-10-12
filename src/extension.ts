@@ -56,34 +56,6 @@ export function activate(context: vscode.ExtensionContext) {
       } else {
         terminal.sendText('npx @modelcontextprotocol/inspector');
       }
-      // Poll for the URL in the config and send to sidebar when available
-      let attempts = 0;
-      const maxAttempts = 20;
-      const poll = async () => {
-        attempts++;
-        const config = vscode.workspace.getConfiguration('mcpDebugger');
-        let url = (config.get<string>('inspectorUrl') || '').toString();
-        if (url && url.startsWith('http')) {
-          if (sidebarWebviewPanel) {
-            sidebarWebviewPanel.webview.postMessage({
-              command: 'setInspectorUrl',
-              url,
-            });
-          }
-          vscode.window.showInformationMessage(
-            'MCP Inspector started. URL auto-populated.'
-          );
-          return;
-        }
-        if (attempts < maxAttempts) {
-          setTimeout(poll, 500);
-        } else {
-          vscode.window.showWarningMessage(
-            'Inspector started, but URL was not detected. Please copy it manually from the terminal.'
-          );
-        }
-      };
-      poll();
     }
   );
   context.subscriptions.push(startInspectorCmd);
@@ -91,7 +63,28 @@ export function activate(context: vscode.ExtensionContext) {
   // Open Inspector command
   const openCmd = vscode.commands.registerCommand(
     'mcp-debugger.openInspector',
-    () => MCPInspectorPanel.createNew(context.extensionUri, context)
+    async (urlFromSidebar?: string) => {
+      // If a URL is provided from the sidebar, use it directly
+      if (urlFromSidebar && typeof urlFromSidebar === 'string') {
+        const config = vscode.workspace.getConfiguration('mcpDebugger');
+        await config.update('inspectorUrl', urlFromSidebar, vscode.ConfigurationTarget.Global);
+        MCPInspectorPanel.createNew(context.extensionUri, context);
+        return;
+      }
+      // Fallback: use config as before
+      const config = vscode.workspace.getConfiguration('mcpDebugger');
+      let url = 'http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=';
+      let token = (config.get<string>('proxySessionToken') || '').toString();
+      if (token) {
+        url = url.replace(/MCP_PROXY_AUTH_TOKEN=([^&]*)/, `MCP_PROXY_AUTH_TOKEN=${token}`);
+      }
+      let customUrl = (config.get<string>('inspectorUrl') || '').toString();
+      if (customUrl && customUrl.startsWith('http')) {
+        url = customUrl.replace(/MCP_PROXY_AUTH_TOKEN=([^&]*)/, `MCP_PROXY_AUTH_TOKEN=${token}`);
+      }
+      await config.update('inspectorUrl', url, vscode.ConfigurationTarget.Global);
+      MCPInspectorPanel.createNew(context.extensionUri, context);
+    }
   );
   context.subscriptions.push(openCmd);
 

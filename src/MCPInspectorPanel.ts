@@ -29,6 +29,16 @@ export class MCPInspectorPanel {
       null,
       this.disposables
     );
+    // Listen for config changes to inspectorUrl and update webview
+    vscode.workspace.onDidChangeConfiguration(
+      (e) => {
+        if (e.affectsConfiguration('mcpDebugger.inspectorUrl')) {
+          this.update();
+        }
+      },
+      null,
+      this.disposables
+    );
     this.panel.webview.onDidReceiveMessage(
       (message) => this.onMessage(message),
       null,

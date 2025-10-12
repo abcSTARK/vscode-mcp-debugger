@@ -102,7 +102,7 @@
       </div>
 
       <div class="section">
-        <button id="startInspectorBtn" class="primary">Start Inspector</button>
+  <button id="startInspectorBtn" class="primary"><span class="icon" style="margin-right:6px">🛠️</span>Setup Inspector</button>
         <div class="row" style="margin-top: 8px; align-items: center">
           <div class="muted small">If the button fails, run</div>
           <div style="flex: 1" class="row">
@@ -161,7 +161,7 @@
             >
           </div>
           <button id="openBtn" class="primary" style="margin-top: 8px">
-            Open Inspector
+            <span class="icon" style="margin-right:6px">🚀</span>Launch Inspector
           </button>
         </div>
       </div>
@@ -324,6 +324,32 @@
           showTransient('Copy failed', 'error');
         }
       });
+      proxySessionTokenInput?.addEventListener('input', async (e) => {
+        const token = proxySessionTokenInput.value.trim();
+        vscode.postMessage({ command: 'saveProxySessionToken', token });
+      });
+
+      // Update Inspector URL when proxy session token changes or loses focus
+      function updateInspectorUrlWithToken() {
+        const urlInput = document.getElementById('inspectorUrl');
+        const proxySessionTokenInput = document.getElementById('proxySessionToken');
+        if (!urlInput || !proxySessionTokenInput) return;
+        let url = urlInput.value.trim();
+        const token = proxySessionTokenInput.value.trim();
+        if (!token) return;
+        if (url.includes('MCP_PROXY_AUTH_TOKEN=')) {
+          url = url.replace(/MCP_PROXY_AUTH_TOKEN=([^&]*)/, `MCP_PROXY_AUTH_TOKEN=${token}`);
+        } else {
+          url += (url.includes('?') ? '&' : '?') + `MCP_PROXY_AUTH_TOKEN=${token}`;
+        }
+        urlInput.value = url;
+      }
+      proxySessionTokenInput?.addEventListener('blur', updateInspectorUrlWithToken);
+      proxySessionTokenInput?.addEventListener('change', updateInspectorUrlWithToken);
+      proxySessionTokenInput?.addEventListener('input', async (e) => {
+        const token = proxySessionTokenInput.value.trim();
+        vscode.postMessage({ command: 'saveProxySessionToken', token });
+      });
 
       // transient in-view status message (accessible)
       function showTransient(text, type = 'info') {
@@ -372,7 +398,8 @@
       });
 
       openBtn?.addEventListener('click', () => {
-        const url = urlInput.value.trim();
+        // Always use the latest value from the Inspector URL textbox
+        let url = urlInput.value.trim();
         try {
           const parsed = new URL(url);
           if (!/^https?:$/.test(parsed.protocol))
@@ -435,7 +462,19 @@
           urlInput.value = msg.url;
           showTransient('Inspector URL filled');
         }
+        if (msg?.command === 'setProxySessionToken' && msg.token) {
+          if (proxySessionTokenInput) {
+            proxySessionTokenInput.value = msg.token;
+            showTransient('Proxy session token filled');
+          }
+        }
       });
+
+      // Pre-fill Inspector URL with default value
+      const inspectorUrlInput = document.getElementById('inspectorUrl');
+      if (inspectorUrlInput) {
+        inspectorUrlInput.value = 'http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=';
+      }
     </script>
   </body>
 </html>

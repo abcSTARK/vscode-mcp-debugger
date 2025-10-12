@@ -28,27 +28,13 @@ export class McpInspectorSidebarProvider implements vscode.WebviewViewProvider {
     webviewView.webview.onDidReceiveMessage(
       async (message) => {
         try {
-          console.log(
-            '[SidebarProvider] Received message from webview:',
-            message
-          );
+          console.log('[SidebarProvider] Received message from webview:', message);
           switch (message?.command) {
             case 'openInspector': {
               const url = message.url;
-              console.log(
-                '[SidebarProvider] openInspector command received, url:',
-                url
-              );
-              if (url && typeof url === 'string') {
-                await vscode.workspace
-                  .getConfiguration('mcpDebugger')
-                  .update(
-                    'inspectorUrl',
-                    url,
-                    vscode.ConfigurationTarget.Global
-                  );
-              }
-              vscode.commands.executeCommand('mcp-debugger.openInspector');
+              console.log('[SidebarProvider] openInspector command received, url:', url);
+              // Pass the URL directly to the Inspector panel via a custom command argument
+              vscode.commands.executeCommand('mcp-debugger.openInspector', url);
               break;
             }
             case 'connectMcp': {
@@ -82,6 +68,15 @@ export class McpInspectorSidebarProvider implements vscode.WebviewViewProvider {
               await vscode.commands.executeCommand(
                 'mcp-debugger.startInspector'
               );
+              break;
+            }
+            case 'saveProxySessionToken': {
+              const token = message.token;
+              if (typeof token === 'string') {
+                await vscode.workspace
+                  .getConfiguration('mcpDebugger')
+                  .update('proxySessionToken', token, vscode.ConfigurationTarget.Global);
+              }
               break;
             }
             default:

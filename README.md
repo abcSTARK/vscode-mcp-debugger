@@ -6,53 +6,54 @@ Debug and inspect Model Context Protocol (MCP) servers right inside VS Code.
 
 This extension embeds the MCP Vibe Inspector in a Webview Panel and provides a lightweight sidebar to quickly configure and launch your Inspector instance—no context switch to the browser needed.
 
+
 ## ✨ Features
 
-- Seamless MCP Vibe Inspector panel inside VS Code
-- Sidebar launcher with URL input and client-side validation
-- **Bearer Token textbox and copy icon in sidebar**
-- **MCP URL textbox and copy icon in sidebar**
-- Loading/error overlay to avoid blank screens and provide quick Retry
-- Copy-to-clipboard for inline code snippets and sidebar fields (icon-only buttons)
-- Theme-aware, accessible UI using VS Code design tokens
-- Remembers your last URL and panel state
-- **NEW in 1.1.0:** Run multiple inspection sessions/tabs at once. Debug and inspect several MCP servers in parallel, each in its own tab for maximum productivity.
-- **NEW in 2.1.0:** Bearer Token and MCP URL sidebar fields with copy-to-clipboard support.
-- **NEW in 2.0.0:** One-click Start Inspector from the sidebar. The extension will run the Inspector in your integrated terminal (using the exact manual command) and provide a clear fallback copyable command if terminal launch fails.
+- 🚀 **Launch Inspector instantly** in VS Code—no browser needed
+- 🛠️ **Setup Inspector** in one click from the sidebar
+- 🔗 **Paste your Inspector URL** and go
+- 🧑‍💻 **Debug multiple servers** in separate tabs
+- 🔑 **Easy token & URL fields** with copy buttons
 
-## 🚀 Getting started
 
-1. **Start the MCP Vibe Inspector with one click:**
+## 🚀 Getting Started (Super Simple!)
 
-- Open the Command Palette (`Cmd+Shift+P` on macOS, `Ctrl+Shift+P` on Windows/Linux) or open the MCP Vibe Inspector sidebar from the Activity Bar.
-- Click the **Start Inspector** button in the sidebar. This runs the exact command used in manual workflows in an integrated terminal:
+1. **Setup the Inspector**
+  - Open VS Code.
+  - Find the MCP Vibe Inspector icon in the Activity Bar (left side).
+  - Click the **🛠️ Setup Inspector** button in the sidebar. This opens the Inspector in your terminal.
+  - If it doesn't work, just copy the command shown and paste it in your terminal:
+    ```
+    npx @modelcontextprotocol/inspector
+    ```
 
-  ```
-  npx @modelcontextprotocol/inspector
-  ```
+2. **Get your Inspector URL**
+  - After starting, look in the terminal for a link like:
+    ```
+    http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=yourtoken
+    ```
+  - Copy this link.
 
-- Behavior:
-  - The Inspector is launched in your integrated terminal so you can see logs and any authentication tokens that appear in stdout.
-  - If the Start button fails to launch the Inspector (rare), use the fallback command above — a copy button is provided next to it in the sidebar for one-click copy.
-  - After Inspector starts, copy the Inspector URL from the terminal output (it contains the required MCP_PROXY_AUTH_TOKEN) and paste it into the sidebar input. Click Open Inspector to open the panel.
-  - You can also enter your Bearer Token and MCP URL in their respective sidebar fields. Use the copy icon next to each field to quickly copy the value to your clipboard for use in other tools or workflows.
+3. **Paste the Inspector URL in the sidebar**
+  - Find the **Inspector URL** box in the sidebar.
+  - Paste your link there.
+  - If you have a Proxy Session Token, enter it in the box below—the Inspector URL will update automatically.
 
-![MCP Vibe Inspector screenshot](media/screenshot-2.png)
+4. **Click Open Inspector**
+  - Click the big blue **Open Inspector** button.
+  - The Inspector panel opens with your exact URL—no guessing, no old values!
 
-2. Open the Inspector panel:
+5. **(Optional) Enter Bearer Token and MCP URL**
+  - If you need these for your server, enter them in the sidebar fields.
+  - Use the copy buttons to quickly copy values for other tools.
 
-- Command Palette → “Open MCP Vibe Inspector”
-- Or via the Activity Bar “MCP” view
+6. **Done!**
+  - You can now debug and inspect your MCP server right inside VS Code.
+  - Open more Inspector panels/tabs if you want to debug multiple servers at once.
 
-![MCP Vibe Inspector screenshot](media/screenshot-3.png)
+**Tip:** If you ever need to change the Inspector URL, just update the box in the sidebar and click **🚀 Launch Inspector** again.
 
-3. Paste or confirm your Inspector URL in the panel header. Example:
 
-```
-http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=…
-```
-
-4. Press Enter or click Reload. If loading takes too long, you’ll see a helpful overlay with a Retry action.
 
 ## 🧭 Commands
 
@@ -61,11 +62,12 @@ http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=…
 
 ![MCP Vibe Inspector screenshot](media/screenshot-4.png)
 
-## ⚙️ Settings
 
-## 📝 Sidebar Fields
 
-- **Inspector URL**: Paste the Inspector URL (with token) here to open the Inspector panel.
+## 📝 Sidebar Fields (What They Do)
+
+- **Inspector URL**: Paste the Inspector URL (with token) here. This is the link you get from the terminal after starting the Inspector.
+- **Proxy Session Token**: Enter your token here if you have one. The Inspector URL will update automatically.
 - **Bearer Token**: Enter your Bearer Token for authentication. Use the copy icon to copy it.
 - **MCP URL**: Enter your MCP server URL. Use the copy icon to copy it.
 
@@ -75,7 +77,8 @@ http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=…
 
 Settings UI: File → Preferences → Settings → search for “MCP Vibe Inspector”.
 
-## 🔧 Troubleshooting
+
+## 🔧 Troubleshooting (If You Get Stuck)
 
 - “Still loading…” overlay appears
   - The Inspector may be slow or unreachable. Verify the URL and network, then use Retry.
@@ -84,7 +87,8 @@ Settings UI: File → Preferences → Settings → search for “MCP Vibe Inspec
 - Invalid URL error
   - Ensure the URL starts with http/https and includes the `MCP_PROXY_AUTH_TOKEN` query parameter when required.
 
-## ❓ FAQ
+
+## ❓ FAQ (Quick Answers)
 
 - Does this extension send telemetry?
   - No. There is no telemetry.
@@ -95,7 +99,8 @@ Settings UI: File → Preferences → Settings → search for “MCP Vibe Inspec
 
 The Model Context Protocol (MCP) is an open protocol that enables LLM apps to discover and call external tools and data sources. The MCP Vibe Inspector is a debugging UI to explore, validate, and troubleshoot MCP servers.
 
-## 🛠 Development
+
+## 🛠 Development (For Advanced Users)
 
 ```bash
 git clone https://github.com/abcSTARK/vscode-mcp-debugger
