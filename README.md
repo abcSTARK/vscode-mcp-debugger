@@ -10,11 +10,14 @@ This extension embeds the MCP Vibe Inspector in a Webview Panel and provides a l
 
 - Seamless MCP Vibe Inspector panel inside VS Code
 - Sidebar launcher with URL input and client-side validation
+- **Bearer Token textbox and copy icon in sidebar**
+- **MCP URL textbox and copy icon in sidebar**
 - Loading/error overlay to avoid blank screens and provide quick Retry
-- Copy-to-clipboard for inline code snippets (icon-only buttons)
+- Copy-to-clipboard for inline code snippets and sidebar fields (icon-only buttons)
 - Theme-aware, accessible UI using VS Code design tokens
 - Remembers your last URL and panel state
 - **NEW in 1.1.0:** Run multiple inspection sessions/tabs at once. Debug and inspect several MCP servers in parallel, each in its own tab for maximum productivity.
+- **NEW in 2.1.0:** Bearer Token and MCP URL sidebar fields with copy-to-clipboard support.
 - **NEW in 2.0.0:** One-click Start Inspector from the sidebar. The extension will run the Inspector in your integrated terminal (using the exact manual command) and provide a clear fallback copyable command if terminal launch fails.
 
 ## 🚀 Getting started
@@ -32,6 +35,7 @@ This extension embeds the MCP Vibe Inspector in a Webview Panel and provides a l
   - The Inspector is launched in your integrated terminal so you can see logs and any authentication tokens that appear in stdout.
   - If the Start button fails to launch the Inspector (rare), use the fallback command above — a copy button is provided next to it in the sidebar for one-click copy.
   - After Inspector starts, copy the Inspector URL from the terminal output (it contains the required MCP_PROXY_AUTH_TOKEN) and paste it into the sidebar input. Click Open Inspector to open the panel.
+  - You can also enter your Bearer Token and MCP URL in their respective sidebar fields. Use the copy icon next to each field to quickly copy the value to your clipboard for use in other tools or workflows.
 
 ![MCP Vibe Inspector screenshot](media/screenshot-2.png)
 
@@ -58,6 +62,12 @@ http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=…
 ![MCP Vibe Inspector screenshot](media/screenshot-4.png)
 
 ## ⚙️ Settings
+
+## 📝 Sidebar Fields
+
+- **Inspector URL**: Paste the Inspector URL (with token) here to open the Inspector panel.
+- **Bearer Token**: Enter your Bearer Token for authentication. Use the copy icon to copy it.
+- **MCP URL**: Enter your MCP server URL. Use the copy icon to copy it.
 
 - `mcpDebugger.inspectorUrl` (string)
   - Default: `http://localhost:3000`

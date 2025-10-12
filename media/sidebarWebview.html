@@ -166,6 +166,56 @@
         </div>
       </div>
 
+        <div class="section">
+          <div class="title">
+            <span class="icon">🔑</span><span>Bearer Token</span>
+          </div>
+          <div style="margin-top: 8px" class="row">
+            <input
+              id="bearerToken"
+              class="url-input"
+              placeholder="Enter Bearer Token"
+              style="flex: 1"
+            />
+            <button
+              id="copyBearerToken"
+              class="copy-btn"
+              title="Copy Bearer Token"
+              aria-label="Copy Bearer Token"
+            >
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M4 2h7a1 1 0 0 1 1 1v1" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="3" y="5" width="9" height="9" rx="1" stroke="currentColor" stroke-width="1.25"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+          <div class="section">
+            <div class="title">
+              <span class="icon">🌐</span><span>MCP URL</span>
+            </div>
+            <div style="margin-top: 8px" class="row">
+              <input
+                id="mcpUrl"
+                class="url-input"
+                placeholder="Enter MCP URL"
+                style="flex: 1"
+              />
+              <button
+                id="copyMcpUrl"
+                class="copy-btn"
+                title="Copy MCP URL"
+                aria-label="Copy MCP URL"
+              >
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M4 2h7a1 1 0 0 1 1 1v1" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+                  <rect x="3" y="5" width="9" height="9" rx="1" stroke="currentColor" stroke-width="1.25"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
       <div class="divider"></div>
 
       <div class="section foot">
@@ -216,6 +266,28 @@
         .textContent.trim();
       const openBtn = document.getElementById('openBtn');
       const urlInput = document.getElementById('inspectorUrl');
+
+      const copyBearerToken = document.getElementById('copyBearerToken');
+      const bearerTokenInput = document.getElementById('bearerToken');
+      copyBearerToken?.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(bearerTokenInput.value.trim());
+          showTransient('Bearer token copied');
+        } catch (e) {
+          showTransient('Copy failed', 'error');
+        }
+      });
+
+      const copyMcpUrl = document.getElementById('copyMcpUrl');
+      const mcpUrlInput = document.getElementById('mcpUrl');
+      copyMcpUrl?.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(mcpUrlInput.value.trim());
+          showTransient('MCP URL copied');
+        } catch (e) {
+          showTransient('Copy failed', 'error');
+        }
+      });
 
       // transient in-view status message (accessible)
       function showTransient(text, type = 'info') {
