@@ -1,3 +1,36 @@
+# 2.3.1 (2025-10-12)
+
+- Sidebar 'Start Inspector' button is now '🛠️ Setup Inspector' with a tool icon for clarity and improved onboarding.
+- README updated to match new button and clarify setup step for all users.
+
+# 2.3.0 (2025-10-12)
+
+- Sidebar 'Open Inspector' button is now '🚀 Launch Inspector' with a rocket icon for clarity and fun.
+- Inspector panel always launches with the exact URL shown in the sidebar—no more confusion or stale values.
+- Proxy Session Token textbox updates the Inspector URL automatically.
+- README updated with a super simple, step-by-step guide for all ages.
+- Product version bumped to 2.3.0.
+
+# [2.2.0] - 2025-10-12
+
+### Added
+
+- Proxy Session Token textbox and copy button in sidebar, matching style and functionality of Bearer Token and MCP URL fields. Makes it easy to copy the proxy session token for use in other tools or workflows.
+
+### Changed
+
+- Bumped minor version to 2.2.0 for new sidebar feature and release prep.
+
+# [2.1.1] - 2025-10-12
+
+### Fixed
+
+- Inspector panel now automatically loads the MCP Inspector URL on first open, without requiring manual reload. This improves workflow and matches user expectations.
+
+### Changed
+
+- Bumped patch version to 2.1.1 for auto-load bugfix and release prep.
+
 # [2.1.0] - 2025-10-12
 
 ### Added

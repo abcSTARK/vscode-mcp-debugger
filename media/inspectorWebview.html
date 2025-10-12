@@ -401,6 +401,18 @@
       let currentLoadId = 0; // increments per load to invalidate stale events
       let restoreApplied = false; // ensure restoreState or initial restore runs once
 
+      // Always load the iframe with the value from the input field on page load
+      window.addEventListener('DOMContentLoaded', () => {
+        urlInput.focus();
+        const initialUrl = urlInput.value.trim();
+        if (initialUrl) {
+          const res = validateUrl(initialUrl);
+          if (res.ok && !collapsed) {
+            mountIframe(initialUrl);
+          }
+        }
+      });
+
       function validateUrl(v) {
         if (!v)
           return { ok: false, message: 'Please paste the inspector URL.' };
@@ -684,6 +696,17 @@
         }
       } catch {}
 
+      // Auto-load on first run if URL is pre-filled and no state was restored
+      if (!restoreApplied) {
+        const initialUrl = urlInput.value.trim();
+        if (initialUrl) {
+          const res = validateUrl(initialUrl);
+          if (res.ok && !collapsed) {
+            mountIframe(initialUrl);
+          }
+        }
+      }
+
       // Listen for messages from extension
       window.addEventListener('message', (event) => {
         const msg = event.data || {};
@@ -704,6 +727,28 @@
         }
         if (msg.command === 'forceCollapse') {
           setCollapsed(true);
+        }
+      });
+
+      // Improve paste reliability on macOS and other platforms
+      window.addEventListener('DOMContentLoaded', () => {
+        urlInput.focus();
+      });
+      document.body.addEventListener('click', () => {
+        urlInput.focus();
+      });
+      urlInput.addEventListener('paste', (e) => {
+        // Optionally process clipboard data here
+        // e.clipboardData.getData('text')
+        // You can show a message if needed
+      });
+      urlInput.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'v') {
+          setTimeout(() => {
+            if (!urlInput.value) {
+              showInlineError('Paste failed. Click the input box and try again.');
+            }
+          }, 100);
         }
       });
     </script>
